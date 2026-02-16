@@ -44,6 +44,7 @@ const AddProductForm = ({ isOpen, onClose, onProductAdded, artistId, artistName 
         'Printmaking',
         'Textile Art',
         'Installation',
+        'Visual Art',
         'Other'
     ];
 

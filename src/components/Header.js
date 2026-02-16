@@ -1,7 +1,38 @@
+'use client';
+import { useState, useEffect } from 'react';
 import Image from "next/image";
 import Avtar from "../../public/Images/avtar.png";
 
 export default function Header() {
+  const [username, setUsername] = useState('Guest');
+
+  useEffect(() => {
+    // Fetch username from backend API
+    const fetchUserData = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          setUsername('Guest');
+          return;
+        }
+
+        const response = await fetch(`/api/user?userId=${userId}`);
+        const data = await response.json();
+
+        if (data.success && data.user) {
+          setUsername(data.user.username);
+        } else {
+          setUsername('Guest');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setUsername('Guest');
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   return (
     <div className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 py-4 px-8 border-b border-gray-200">
       <div className="flex items-center justify-between">
@@ -21,7 +52,7 @@ export default function Header() {
               className="object-cover h-full w-full"
             />
           </div>
-          <p className="text-gray-800 font-semibold">Komal Ribadiya</p>
+          <p className="text-gray-800 font-semibold">{username}</p>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import UserModel from "@/app/models/userModel";
 import dbConnect from "@/app/lib/db";
+import { sendLoginNotificationEmail } from "@/app/lib/emailService";
 
 export async function POST(request) {
     await dbConnect();
@@ -22,6 +23,11 @@ export async function POST(request) {
             { status: 400 }
         );
     }
+
+    // Send login notification email asynchronously (don't wait for it)
+    sendLoginNotificationEmail(user.email, user.username)
+        .then(() => console.log('Login notification email sent successfully'))
+        .catch(err => console.error('Failed to send login notification email:', err));
 
     const res = NextResponse.json(
         {

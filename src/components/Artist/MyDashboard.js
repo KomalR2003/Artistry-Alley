@@ -87,7 +87,7 @@ export default function Dashboard() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#171C3C] via-[#D1CAF2] to-[#98C4EC]">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-[#171C3C] ">
                         Artist Dashboard
                     </h1>
                     <p className="text-[#171C3C]/70 mt-1">

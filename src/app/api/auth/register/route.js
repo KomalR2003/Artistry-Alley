@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/app/lib/db";
 import UserModel from "@/app/models/userModel";
+import { sendWelcomeEmail } from "@/app/lib/emailService";
 
 export async function GET() {
   return NextResponse.json({
@@ -56,6 +57,11 @@ export async function POST(req) {
 
     const safeUser = user.toObject();
     delete safeUser.password;
+
+    // Send welcome email asynchronously (don't wait for it)
+    sendWelcomeEmail(body.email, body.username, body.role || 'user')
+      .then(() => console.log('Welcome email sent successfully'))
+      .catch(err => console.error('Failed to send welcome email:', err));
 
     return NextResponse.json(
       { success: true, message: "User registered", data: safeUser },

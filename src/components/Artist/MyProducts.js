@@ -19,7 +19,8 @@ const MyProducts = () => {
   const [stats, setStats] = useState({
     total: 0,
     purchased: 0,
-    categories: 0
+    categories: 0,
+    inStock: 0
   });
 
   useEffect(() => {
@@ -58,11 +59,16 @@ const MyProducts = () => {
         const total = data.products.length;
         const purchased = data.products.filter(p => !p.inStock).length;
         const uniqueCategories = [...new Set(data.products.map(p => p.category))].length;
+        // Calculate total stock quantity (sum of all stock numbers)
+        const totalStockQuantity = data.products.reduce((sum, p) => {
+          return sum + (p.inStock ? (p.stock || 0) : 0);
+        }, 0);
 
         setStats({
           total,
           purchased,
-          categories: uniqueCategories
+          categories: uniqueCategories,
+          inStock: totalStockQuantity
         });
       } else {
         setError(data.message || 'Failed to fetch products');
@@ -134,7 +140,7 @@ const MyProducts = () => {
       {/* Header */}
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#171C3C] via-[#98C4EC] to-[#FE9E8F]">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-[#171C3C]">
             My Products
           </h1>
           <p className="text-[#171C3C]/70 mt-2">
@@ -182,7 +188,7 @@ const MyProducts = () => {
               </div>
               <div className="flex flex-col justify-center">
                 <span className="text-sm text-[#171C3C]/60 font-medium whitespace-nowrap mb-1">In Stock</span>
-                <span className="text-2xl font-semibold text-[#171C3C] tracking-tight">{stats.total - stats.purchased}</span>
+                <span className="text-2xl font-semibold text-[#171C3C] tracking-tight">{stats.inStock}</span>
               </div>
             </div>
           </div>
@@ -310,7 +316,7 @@ const MyProducts = () => {
                     onClick={() => handleDeleteProduct(product._id)}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium"
                   >
-                    <Trash2 className="w-4 h-4" />              
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
