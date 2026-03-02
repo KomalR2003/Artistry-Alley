@@ -28,7 +28,7 @@ const stats = [
   },
   {
     title: "Gallery Overview",
-    barColor: "bg-[#D1CAF2]",
+    barColor: "bg-[#4ADE80]",
     items: [
       { label: "Total Arts", value: "840" },
       { label: "Albums", value: "450" },
@@ -37,7 +37,7 @@ const stats = [
   },
   {
     title: "Marketplace",
-    barColor: "bg-[#98C4EC]",
+    barColor: "bg-[#C084FC]",
     items: [
       { label: "Products", value: "250" },
       { label: "Orders", value: "180" }

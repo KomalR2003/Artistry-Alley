@@ -1,8 +1,11 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Package, Star, TrendingUp, Search, Filter, X, Loader2, Eye } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import toast from 'react-hot-toast';
 
 export default function Products() {
+    const { addToCart, isInCart } = useCart();
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -98,6 +101,14 @@ export default function Products() {
     const clearFilters = () => {
         setSearchQuery('');
         setSelectedCategory('all');
+    };
+
+    const handleAddToCart = (product) => {
+        if (!product.inStock) {
+            toast.error('Product is out of stock');
+            return;
+        }
+        addToCart(product);
     };
 
     return (
@@ -449,13 +460,14 @@ export default function Products() {
                             {/* Action Buttons */}
                             <div className="flex gap-4">
                                 <button
-                                    disabled={!selectedProduct.inStock}
-                                    className={`flex-1 py-3 rounded-xl font-medium transition-colors ${selectedProduct.inStock
-                                        ? 'bg-[#171C3C] text-white hover:bg-[#171C3C]/90'
-                                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                    onClick={() => handleAddToCart(selectedProduct)}
+                                    disabled={!selectedProduct.inStock || isInCart(selectedProduct._id)}
+                                    className={`flex-1 py-3 rounded-xl font-medium transition-colors ${selectedProduct.inStock && !isInCart(selectedProduct._id)
+                                            ? 'bg-[#171C3C] text-white hover:bg-[#171C3C]/90'
+                                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                         }`}
                                 >
-                                    {selectedProduct.inStock ? 'Add to Cart' : 'Out of Stock'}
+                                    {!selectedProduct.inStock ? 'Out of Stock' : isInCart(selectedProduct._id) ? 'Already in Cart' : 'Add to Cart'}
                                 </button>
                                 <button className="px-6 py-3 border border-[#171C3C] text-[#171C3C] rounded-xl hover:bg-[#171C3C]/5 transition-colors font-medium">
                                     Contact Artist

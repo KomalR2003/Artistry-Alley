@@ -621,3 +621,602 @@ export default {
     sendWelcomeEmail,
     sendLoginNotificationEmail,
 };
+
+// ORDER EMAIL TEMPLATES
+
+const getOrderConfirmationTemplate = (order) => {
+    const orderDate = new Date(order.createdAt).toLocaleString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+    });
+
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #171C3C;
+                background: #F5F7FA;
+                padding: 20px;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 10px 40px rgba(23, 28, 60, 0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #98C4EC 0%, #D1CAF2 50%, #FE9E8F 100%);
+                padding: 50px 30px;
+                text-align: center;
+            }
+            .header h1 {
+                color: white;
+                font-size: 32px;
+                font-weight: 700;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            }
+            .emoji-large {
+                font-size: 60px;
+                margin-bottom: 15px;
+                display: block;
+            }
+            .content {
+                padding: 40px 35px;
+            }
+            .order-badge {
+                display: inline-block;
+                background: linear-gradient(135deg, #FE9E8F 0%, #D1CAF2 100%);
+                color: white;
+                padding: 10px 25px;
+                border-radius: 25px;
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 25px;
+            }
+            .greeting {
+                font-size: 24px;
+                color: #171C3C;
+                margin-bottom: 15px;
+                font-weight: 600;
+            }
+            .order-card {
+                background: linear-gradient(135deg, #F8F9FA 0%, #E8EBF0 100%);
+                padding: 25px;
+                border-radius: 15px;
+                margin: 25px 0;
+                border-left: 5px solid #98C4EC;
+            }
+            .order-info {
+                display: flex;
+                justify-content: space-between;
+                margin: 10px 0;
+                padding: 10px 0;
+                border-bottom: 1px solid #E0E0E0;
+            }
+            .order-info:last-child {
+                border-bottom: none;
+            }
+            .label {
+                color: #666;
+                font-weight: 500;
+            }
+            .value {
+                color: #171C3C;
+                font-weight: 700;
+            }
+            .items-section {
+                margin: 25px 0;
+            }
+            .item {
+                background: white;
+                padding: 15px;
+                border-radius: 10px;
+                margin: 10px 0;
+                border: 2px solid #F0F2F5;
+            }
+            .item-name {
+                font-weight: 700;
+                color: #171C3C;
+                margin-bottom: 5px;
+            }
+            .item-details {
+                color: #666;
+                font-size: 14px;
+            }
+            .total-section {
+                background: linear-gradient(135deg, #171C3C 0%, #2a3154 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 12px;
+                margin: 25px 0;
+                text-align: center;
+            }
+            .total-amount {
+                font-size: 32px;
+                font-weight: 700;
+                margin: 10px 0;
+            }
+            .footer {
+                background: #F8F9FA;
+                padding: 30px;
+                text-align: center;
+                color: #999;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <span class="emoji-large">🎉</span>
+                <h1>Order Confirmed!</h1>
+            </div>
+            
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="order-badge">✓ ORDER PLACED</span>
+                </div>
+                
+                <p class="greeting">Hi ${order.customer.name}! 👋</p>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Thank you for your purchase at Artistry Gallery! Your order has been successfully placed.
+                </p>
+                
+                <div class="order-card">
+                    <h3 style="color: #171C3C; margin-bottom: 15px;">Order Details</h3>
+                    <div class="order-info">
+                        <span class="label">Order ID:</span>
+                        <span class="value">#${order.orderId}</span>
+                    </div>
+                    <div class="order-info">
+                        <span class="label">Order Date:</span>
+                        <span class="value">${orderDate}</span>
+                    </div>
+                    <div class="order-info">
+                        <span class="label">Payment Status:</span>
+                        <span class="value" style="color: #4CAF50;">✓ Paid</span>
+                    </div>
+                </div>
+                
+                <div class="items-section">
+                    <h3 style="color: #171C3C; margin-bottom: 15px;">Items Purchased</h3>
+                    ${order.items.map(item => `
+                        <div class="item">
+                            <div class="item-name">${item.productname}</div>
+                            <div class="item-details">
+                                Quantity: ${item.quantity} × ₹${item.price} = ₹${item.price * item.quantity}<br>
+                                Artist: ${item.artistName}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="total-section">
+                    <div style="font-size: 16px; opacity: 0.9;">Total Amount</div>
+                    <div class="total-amount">₹${order.totalAmount}</div>
+                </div>
+                
+                <div style="background: #FFF9F5; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #FE9E8F;">
+                    <p style="color: #171C3C; font-weight: 600; margin-bottom: 8px;">📦 What's Next?</p>
+                    <p style="color: #666; font-size: 14px; line-height: 1.7;">
+                        The artist will confirm your order shortly. You'll receive an email notification when your order is confirmed and ready for delivery.
+                    </p>
+                </div>
+                
+                <p style="margin-top: 30px; color: #666; font-size: 15px; text-align: center;">
+                    Thank you for supporting our artists!
+                </p>
+            </div>
+            
+            <div class="footer">
+                <div style="margin-bottom: 15px; color: #171C3C; font-weight: 600;">Artistry - Where Art Meets Passion</div>
+                <p>© 2026 Artistry. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+};
+
+const getArtistOrderAlertTemplate = (order, item) => {
+    const orderDate = new Date(order.createdAt).toLocaleString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #171C3C;
+                background: #F5F7FA;
+                padding: 20px;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 10px 40px rgba(23, 28, 60, 0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #FE9E8F 0%, #D1CAF2 50%, #98C4EC 100%);
+                padding: 50px 30px;
+                text-align: center;
+            }
+            .header h1 {
+                color: white;
+                font-size: 32px;
+                font-weight: 700;
+            }
+            .content {
+                padding: 40px 35px;
+            }
+            .badge {
+                display: inline-block;
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                color: white;
+                padding: 10px 25px;
+                border-radius: 25px;
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 25px;
+            }
+            .product-card {
+                background: linear-gradient(135deg, #F8F9FA 0%, #E8EBF0 100%);
+                padding: 25px;
+                border-radius: 15px;
+                margin: 25px 0;
+                border-left: 5px solid #FE9E8F;
+            }
+            .customer-card {
+                background: white;
+                padding: 20px;
+                border-radius: 12px;
+                margin: 20px 0;
+                border: 2px solid #E8EBF0;
+            }
+            .info-row {
+                display: flex;
+                justify-content: space-between;
+                margin: 12px 0;
+                padding: 10px 0;
+                border-bottom: 1px solid #E0E0E0;
+            }
+            .info-row:last-child { border-bottom: none; }
+            .label { color: #666; font-weight: 500; }
+            .value { color: #171C3C; font-weight: 700; }
+            .cta-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #171C3C 0%, #2a3154 100%);
+                color: white;
+                padding: 15px 40px;
+                border-radius: 12px;
+                text-decoration: none;
+                font-weight: 600;
+                margin: 20px 0;
+            }
+            .footer {
+                background: #F8F9FA;
+                padding: 30px;
+                text-align: center;
+                color: #999;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <span style="font-size: 60px; display: block; margin-bottom: 15px;">🛍️</span>
+                <h1>New Order!</h1>
+            </div>
+            
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="badge">🎨 NEW ORDER RECEIVED</span>
+                </div>
+                
+                <p style="font-size: 24px; color: #171C3C; margin: 20px 0; font-weight: 600;">
+                    Great news, ${item.artistName}! 🎉
+                </p>
+                <p style="color: #666; margin-bottom: 25px;">
+                    You have a new order for your artwork. A customer has purchased your creation!
+                </p>
+                
+                <div class="product-card">
+                    <h3 style="color: #171C3C; margin-bottom: 15px;">Product Details</h3>
+                    <div class="info-row">
+                        <span class="label">Product:</span>
+                        <span class="value">${item.productname}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Quantity:</span>
+                        <span class="value">${item.quantity}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Price per item:</span>
+                        <span class="value">₹${item.price}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Total Amount:</span>
+                        <span class="value" style="font-size: 20px; color: #4CAF50;">₹${item.price * item.quantity}</span>
+                    </div>
+                </div>
+                
+                <div class="customer-card">
+                    <h3 style="color: #171C3C; margin-bottom: 15px;">Customer Information</h3>
+                    <div class="info-row">
+                        <span class="label">Name:</span>
+                        <span class="value">${order.customer.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Email:</span>
+                        <span class="value">${order.customer.email}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Phone:</span>
+                        <span class="value">${order.customer.phone}</span>
+                    </div>
+                    ${order.customer.address ? `
+                    <div class="info-row">
+                        <span class="label">Address:</span>
+                        <span class="value">${order.customer.address}, ${order.customer.city || ''}, ${order.customer.state || ''} ${order.customer.pincode || ''}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E8F4FD 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #98C4EC;">
+                    <p style="color: #171C3C; font-weight: 600; margin-bottom: 8px;">📋 Next Steps</p>
+                    <p style="color: #666; font-size: 14px; line-height: 1.7;">
+                        Please log in to your artist dashboard to confirm this order. Once confirmed, the customer will be notified and the order will proceed to delivery.
+                    </p>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <p style="color: #666; margin-bottom: 10px;">Order ID: <strong>#${order.orderId}</strong></p>
+                    <p style="color: #999; font-size: 14px;">Order Date: ${orderDate}</p>
+                </div>
+                
+                <p style="margin-top: 30px; color: #666; font-size: 15px; text-align: center;">
+                    Congratulations on your sale! Keep creating amazing art! 🎨
+                </p>
+            </div>
+            
+            <div class="footer">
+                <div style="margin-bottom: 15px; color: #171C3C; font-weight: 600;">Artistry - Where Art Meets Passion</div>
+                <p>© 2026 Artistry. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+};
+
+const getOrderConfirmedByArtistTemplate = (order, item) => {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #171C3C;
+                background: #F5F7FA;
+                padding: 20px;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 10px 40px rgba(23, 28, 60, 0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #98C4EC 100%);
+                padding: 50px 30px;
+                text-align: center;
+            }
+            .header h1 {
+                color: white;
+                font-size: 32px;
+                font-weight: 700;
+            }
+            .content {
+                padding: 40px 35px;
+            }
+            .badge {
+                display: inline-block;
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                color: white;
+                padding: 10px 25px;
+                border-radius: 25px;
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 25px;
+            }
+            .product-card {
+                background: linear-gradient(135deg, #F0F9FF 0%, #E8F4FD 100%);
+                padding: 25px;
+                border-radius: 15px;
+                margin: 25px 0;
+                border-left: 5px solid #4CAF50;
+            }
+            .info-row {
+                display: flex;
+                justify-content: space-between;
+                margin: 12px 0;
+                padding: 10px 0;
+                border-bottom: 1px solid #E0E0E0;
+            }
+            .info-row:last-child { border-bottom: none; }
+            .label { color: #666; font-weight: 500; }
+            .value { color: #171C3C; font-weight: 700; }
+            .footer {
+                background: #F8F9FA;
+                padding: 30px;
+                text-align: center;
+                color: #999;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <span style="font-size: 60px; display: block; margin-bottom: 15px;">✅</span>
+                <h1>Order Confirmed!</h1>
+            </div>
+            
+            <div class="content">
+                <div style="text-align: center;">
+                    <span class="badge">✓ ARTIST CONFIRMED</span>
+                </div>
+                
+                <p style="font-size: 24px; color: #171C3C; margin: 20px 0; font-weight: 600;">
+                    Great news, ${order.customer.name}! 🎉
+                </p>
+                <p style="color: #666; margin-bottom: 25px;">
+                    The artist has confirmed your order! Your artwork is now being prepared for delivery.
+                </p>
+                
+                <div class="product-card">
+                    <h3 style="color: #171C3C; margin-bottom: 15px;">Order Update</h3>
+                    <div class="info-row">
+                        <span class="label">Order ID:</span>
+                        <span class="value">#${order.orderId}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Product:</span>
+                        <span class="value">${item.productname}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Artist:</span>
+                        <span class="value">${item.artistName}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Quantity:</span>
+                        <span class="value">${item.quantity}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Status:</span>
+                        <span class="value" style="color: #4CAF50;">✓ Confirmed & Being Prepared</span>
+                    </div>
+                </div>
+                
+                <div style="background: #FFF9F5; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #FE9E8F;">
+                    <p style="color: #171C3C; font-weight: 600; margin-bottom: 8px;">📦 Expected Delivery</p>
+                    <p style="color: #666; font-size: 14px; line-height: 1.7;">
+                        Your order will be carefully packaged and shipped soon. We'll notify you with tracking details once it's dispatched.
+                    </p>
+                </div>
+                
+                <p style="margin-top: 30px; color: #666; font-size: 15px; text-align: center;">
+                    Thank you for supporting artists on Artistry! 🎨
+                </p>
+            </div>
+            
+            <div class="footer">
+                <div style="margin-bottom: 15px; color: #171C3C; font-weight: 600;">Artistry - Where Art Meets Passion</div>
+                <p>© 2026 Artistry. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+};
+
+// Send order confirmation email to customer
+export const sendOrderConfirmationEmail = async (order) => {
+    try {
+        const transporter = createTransporter();
+
+        const mailOptions = {
+            from: process.env.EMAIL_FROM || `"Artistry" <${process.env.EMAIL_USER}>`,
+            to: order.customer.email,
+            subject: `🎨 Order Confirmed - Artistry Gallery #${order.orderId}`,
+            html: getOrderConfirmationTemplate(order),
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Order confirmation email sent:', info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error('Error sending order confirmation email:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+// Send new order alert to artist
+export const sendArtistOrderAlertEmail = async (order, item) => {
+    try {
+        if (!item.artistEmail) {
+            console.log('No artist email found for item:', item.productname);
+            return { success: false, error: 'No artist email' };
+        }
+
+        const transporter = createTransporter();
+
+        const mailOptions = {
+            from: process.env.EMAIL_FROM || `"Artistry" <${process.env.EMAIL_USER}>`,
+            to: item.artistEmail,
+            subject: `🛍️ New Order for Your Artwork - ${item.productname}`,
+            html: getArtistOrderAlertTemplate(order, item),
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Artist order alert email sent:', info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error('Error sending artist order alert email:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+// Send order confirmed notification to customer
+export const sendOrderConfirmedByArtistEmail = async (order, item) => {
+    try {
+        const transporter = createTransporter();
+
+        const mailOptions = {
+            from: process.env.EMAIL_FROM || `"Artistry" <${process.env.EMAIL_USER}>`,
+            to: order.customer.email,
+            subject: `✅ Order Confirmed by Artist - ${item.productname}`,
+            html: getOrderConfirmedByArtistTemplate(order, item),
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Order confirmed by artist email sent:', info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error('Error sending order confirmed email:', error);
+        return { success: false, error: error.message };
+    }
+};
+

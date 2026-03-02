@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/context/CartContext";
 import logo from "../../public/Images/Artistry.png";
 import LogoutModal from "./LogoutModal";
 import {
@@ -15,7 +16,8 @@ import {
     Menu,
     X,
     LogOut,
-    LayoutDashboard
+    LayoutDashboard,
+    ShoppingCart
 } from "lucide-react";
 
 const navLinks = [
@@ -29,10 +31,14 @@ const navLinks = [
     { label: "Contact Us", href: "/contact" },
 ];
 
-export default function Navbar({ onNavigate }) {
+export default function Navbar({ onNavigate, activeView }) {
     const router = useRouter();
+    const { getCartCount } = useCart();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+    // Hide cart badge when on Cart page
+    const showCartBadge = activeView !== 'Cart';
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -87,8 +93,29 @@ export default function Navbar({ onNavigate }) {
                         })}
                     </div>
 
-                    {/* Logout Button (Desktop) */}
-                    <div className="hidden lg:flex items-center">
+                    {/* Desktop Right Side Actions */}
+                    <div className="hidden lg:flex items-center gap-3">
+                        {/* Cart Icon */}
+                        <button
+                            onClick={(e) => {
+                                if (onNavigate) {
+                                    e.preventDefault();
+                                    onNavigate('Cart');
+                                } else {
+                                    router.push('/user/cart');
+                                }
+                            }}
+                            className="relative p-2 rounded-xl text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
+                        >
+                            <ShoppingCart size={24} />
+                            {showCartBadge && getCartCount() > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-[#FE9E8F] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                    {getCartCount()}
+                                </span>
+                            )}
+                        </button>
+
+                        {/* Logout Button */}
                         <button
                             onClick={() => setIsLogoutModalOpen(true)}
                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#FE9E8F] to-[#FF7A66] text-white hover:shadow-lg transition-all duration-200 font-medium"
@@ -132,7 +159,32 @@ export default function Navbar({ onNavigate }) {
                             );
                         })}
 
-                        <div className="pt-4 border-t border-gray-200">
+                        <div className="pt-4 border-t border-gray-200 space-y-2">
+                            {/* Cart Button */}
+                            <button
+                                onClick={(e) => {
+                                    if (onNavigate) {
+                                        e.preventDefault();
+                                        onNavigate('Cart');
+                                    } else {
+                                        router.push('/user/cart');
+                                    }
+                                    setIsMobileMenuOpen(false);
+                                }}
+                                className="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-[#98C4EC]/10 text-[#171C3C] font-semibold hover:bg-[#98C4EC]/20 transition-all"
+                            >
+                                <span className="flex items-center gap-3">
+                                    <ShoppingCart size={20} />
+                                    <span>Cart</span>
+                                </span>
+                                {showCartBadge && getCartCount() > 0 && (
+                                    <span className="bg-[#FE9E8F] text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                                        {getCartCount()}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Logout Button */}
                             <button
                                 onClick={() => {
                                     setIsLogoutModalOpen(true);

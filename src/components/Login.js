@@ -38,6 +38,10 @@ export default function Login() {
         if (res.data.username) {
           localStorage.setItem('username', res.data.username);
         }
+        // Store email for order retrieval
+        if (form.email) {
+          localStorage.setItem('userEmail', form.email);
+        }
 
         toast.success("Login successful");
         let redirectTo = res.data.redirect ?? "/home";

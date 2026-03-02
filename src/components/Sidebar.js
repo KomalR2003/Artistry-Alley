@@ -14,7 +14,8 @@ import {
   FileText,
   Menu,
   X,
-  LayoutDashboard
+  LayoutDashboard,
+  ShoppingBag
 } from "lucide-react";
 
 import Link from "next/link";
@@ -41,6 +42,7 @@ const navItems = [
   { label: "MyGallery", icon: ImageIcon, href: "/artist", roles: ["artist"] },
   { label: "MyProducts", icon: Box, href: "/artist", roles: ["artist"] },
   { label: "MyEvents", icon: Calendar, href: "/artist", roles: ["artist"] },
+  { label: "MyOrders", icon: ShoppingBag, href: "/artist", roles: ["artist"] },
   // { label: "My Blogs", icon: Box, href: "/artist", roles: ["artist"] },
   { label: "MyPortfolio", icon: ImageIcon, href: "/artist", roles: ["artist"] },
 ];

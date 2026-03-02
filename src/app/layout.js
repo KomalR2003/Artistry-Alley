@@ -1,6 +1,7 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import { CartProvider } from "@/context/CartContext";
 
 
 const poppins = Poppins({
@@ -20,7 +21,9 @@ export default function RootLayout({ children }) {
       <body
         className={`${poppins.className} antialiased`}
       >
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
         <Toaster
           position="top-center"
           reverseOrder={false}

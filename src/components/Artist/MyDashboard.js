@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     TrendingUp,
     Users,
@@ -27,7 +27,7 @@ const stats = [
     },
     {
         title: "My Products",
-        barColor: "bg-[#98C4EC]",
+        barColor: "bg-[#4ADE80]",
         items: [
             { label: "Total Products", value: "24" },
             { label: "Purchased", value: "12" }
@@ -70,11 +70,7 @@ const recentActivity = [
     },
 ];
 
-const recentGallery = [
-    { name: "Neon City", date: "Jan 12", status: "Published", color: "bg-gradient-to-br from-[#FE9E8F] to-[#D1CAF2]" },
-    { name: "Ocean Depth", date: "Jan 10", status: "Published", color: "bg-gradient-to-br from-[#98C4EC] to-[#D1CAF2]" },
-    { name: "Forest Mist", date: "Jan 05", status: "Published", color: "bg-gradient-to-br from-[#D1CAF2] to-[#98C4EC]" },
-];
+// recentGallery is now fetched from API
 
 const recentProducts = [
     { name: "Canvas Print", price: "$45", stock: "12", color: "bg-[#D1CAF2]" },
@@ -82,6 +78,49 @@ const recentProducts = [
 ];
 
 export default function Dashboard() {
+    const [recentGallery, setRecentGallery] = useState([]);
+    const [loadingGallery, setLoadingGallery] = useState(true);
+
+    useEffect(() => {
+        const fetchRecentGallery = async () => {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                try {
+                    const response = await fetch(`/api/gallery?artistId=${userId}&status=active&limit=3&sortBy=createdAt&order=desc`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const colors = [
+                            "bg-gradient-to-br from-[#FE9E8F] to-[#D1CAF2]",
+                            "bg-gradient-to-br from-[#98C4EC] to-[#D1CAF2]",
+                            "bg-gradient-to-br from-[#D1CAF2] to-[#98C4EC]"
+                        ];
+
+                        const formattedGallery = data.images.slice(0, 3).map((img, index) => {
+                            const date = new Date(img.createdAt);
+                            const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+                            return {
+                                _id: img._id,
+                                name: img.title,
+                                date: formattedDate,
+                                status: img.status === 'active' ? 'Published' : img.status,
+                                color: colors[index % colors.length],
+                                imageUrl: img.imageUrl
+                            };
+                        });
+
+                        setRecentGallery(formattedGallery);
+                    }
+                } catch (error) {
+                    console.error("Error fetching recent gallery:", error);
+                }
+            }
+            setLoadingGallery(false);
+        };
+
+        fetchRecentGallery();
+    }, []);
+
     return (
         <div className="w-full h-full bg-white text-[#171C3C] p-8 overflow-y-auto custom-scrollbar">
             {/* Header Section */}
@@ -131,9 +170,16 @@ export default function Dashboard() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {recentGallery.map((art, idx) => (
+                            {loadingGallery ? (
+                                <p className="text-sm text-gray-500 col-span-3 text-center py-4">Loading...</p>
+                            ) : recentGallery.length === 0 ? (
+                                <p className="text-sm text-gray-500 col-span-3 text-center py-4">No gallery uploads yet.</p>
+                            ) : recentGallery.map((art, idx) => (
                                 <div key={idx} className="p-3 rounded-xl bg-white border border-[#D1CAF2]/40 hover:border-[#98C4EC] transition-all cursor-pointer group shadow-sm hover:shadow-md">
-                                    <div className={`h-32 mb-3 rounded-lg ${art.color} relative overflow-hidden`}>
+                                    <div
+                                        className={`h-32 mb-3 rounded-lg ${art.color} relative overflow-hidden bg-cover bg-center`}
+                                        style={art.imageUrl ? { backgroundImage: `url(${art.imageUrl})` } : {}}
+                                    >
                                         <div className="absolute inset-0 bg-white/10 group-hover:bg-transparent transition-colors"></div>
                                     </div>
                                     <h4 className="font-bold text-[#171C3C] mb-1 truncate">{art.name}</h4>
