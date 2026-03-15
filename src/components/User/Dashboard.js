@@ -1,73 +1,269 @@
-import React from 'react';
-import { Activity, Heart, ShoppingBag, Eye, Package } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { Activity, ShoppingBag, Calendar as CalendarIcon, Package, MapPin, Clock, Loader2, Search, ArrowRight } from 'lucide-react';
 
-export default function Dashboard({ onNavigate }) {
+export default function Dashboard({ onNavigate, user }) {
+    const [orders, setOrders] = useState([]);
+    const [registrations, setRegistrations] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const initialStats = [
+        {
+            title: "My Collection",
+            barColor: "bg-[#FE9E8F]",
+            items: [
+                { id: 'totalPurchases', label: "Total Purchases", value: "0" },
+                { id: 'recentOrders', label: "Recent Orders", value: "0" }
+            ],
+            navTarget: 'My Orders'
+        },
+        {
+            title: "My Events",
+            barColor: "bg-[#98C4EC]",
+            items: [
+                { id: 'registeredEvents', label: "Registered", value: "0" },
+                { id: 'upcomingEvents', label: "Upcoming", value: "0" }
+            ],
+            navTarget: 'Events'
+        },
+        {
+            title: "Gallery Activity",
+            barColor: "bg-[#D1CAF2]",
+            items: [
+                { id: 'totalActivity', label: "Recent Actions", value: "0" }
+            ]
+        }
+    ];
+
+    const [dashboardStats, setDashboardStats] = useState(initialStats);
+
+    useEffect(() => {
+        const localUserId = sessionStorage.getItem('userId');
+        const localEmail = sessionStorage.getItem('userEmail');
+        const localName = sessionStorage.getItem('userName');
+
+        const activeUser = user || (localUserId ? { _id: localUserId, id: localUserId, email: localEmail, name: localName } : null);
+
+        if (activeUser) {
+            fetchDashboardData(activeUser);
+        } else {
+            setLoading(false);
+        }
+    }, [user]);
+
+    const fetchDashboardData = async (activeUser) => {
+        setLoading(true);
+        try {
+            // Fetch Orders
+            const ordersRes = await fetch('/api/orders/user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: activeUser?._id || activeUser?.id, email: activeUser?.email })
+            });
+            const ordersData = await ordersRes.json();
+            const fetchedOrders = ordersData.success ? ordersData.orders : [];
+
+            // Fetch Event Registrations
+            const eventsRes = await fetch(`/api/events/user/registrations?userId=${activeUser?._id || activeUser?.id}&email=${activeUser?.email}`);
+            const eventsData = await eventsRes.json();
+            const fetchedEvents = eventsData.success ? eventsData.registrations : [];
+
+            setOrders(fetchedOrders);
+            setRegistrations(fetchedEvents);
+
+            // Compute Stats
+            const recentOrdersCount = fetchedOrders.filter(o => {
+                const orderDate = new Date(o.createdAt);
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                return orderDate >= thirtyDaysAgo;
+            }).length;
+
+            const upcomingEventsCount = fetchedEvents.filter(reg => {
+                if (!reg.eventId?.startDate) return false;
+                return new Date(reg.eventId.startDate) >= new Date();
+            }).length;
+
+            setDashboardStats(prev => {
+                const newStats = [...prev];
+                // Collection
+                if (newStats[0]) {
+                    newStats[0].items[0].value = fetchedOrders.length.toString();
+                    newStats[0].items[1].value = recentOrdersCount.toString();
+                }
+                // Events
+                if (newStats[1]) {
+                    newStats[1].items[0].value = fetchedEvents.length.toString();
+                    newStats[1].items[1].value = upcomingEventsCount.toString();
+                }
+                // Activity
+                if (newStats[2]) {
+                    const activityCount = fetchedOrders.slice(0, 5).length + fetchedEvents.slice(0, 5).length;
+                    newStats[2].items[0].value = activityCount.toString();
+                }
+                return newStats;
+            });
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="w-full h-full min-h-[60vh] flex flex-col items-center justify-center">
+                <Loader2 className="w-10 h-10 text-[#98C4EC] animate-spin mb-4" />
+                <p className="text-[#171C3C]/60 font-medium">Loading your dashboard...</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="w-full h-full bg-white text-[#171C3C] p-8 overflow-y-auto">
-            {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#171C3C] via-[#98C4EC] to-[#D1CAF2]">
-                    User Dashboard
-                </h1>
-                <p className="text-[#171C3C]/70 mt-2">
-                    Welcome to your dashboard space.
-                </p>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-[#98C4EC]/10 p-6 rounded-xl border border-[#98C4EC]/40 hover:shadow-lg transition-shadow">
-                    <Eye className="w-8 h-8 text-[#98C4EC] mb-3" />
-                    <h3 className="text-2xl font-bold text-[#171C3C]">42</h3>
-                    <p className="text-sm text-[#171C3C]/60">Gallery Views</p>
+        <div
+            className="w-full h-full bg-white text-[#171C3C] p-4 sm:p-8 overflow-y-auto custom-scrollbar"
+            style={{ fontFamily: "'Poppins', sans-serif" }}
+        >
+            {/* Header Section (Admin Dashboard Style) */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-black">
+                        Welcome back, <span className="text-black">{user?.name ? user.name.split(' ')[0] : 'Curator'}</span>
+                    </h1>
+                    <p className="text-[#171C3C]/70 mt-1">
+                        Here is an overview of your collection and schedule.
+                    </p>
                 </div>
-
-                <div className="bg-[#D1CAF2]/10 p-6 rounded-xl border border-[#D1CAF2]/40 hover:shadow-lg transition-shadow">
-                    <Heart className="w-8 h-8 text-[#D1CAF2] mb-3" />
-                    <h3 className="text-2xl font-bold text-[#171C3C]">18</h3>
-                    <p className="text-sm text-[#171C3C]/60">Favorites</p>
-                </div>
-
-                <div
-                    onClick={() => onNavigate && onNavigate('My Orders')}
-                    className="bg-[#FE9E8F]/10 p-6 rounded-xl border border-[#FE9E8F]/40 hover:shadow-lg transition-all cursor-pointer hover:scale-105"
-                >
-                    <ShoppingBag className="w-8 h-8 text-[#FE9E8F] mb-3" />
-                    <h3 className="text-2xl font-bold text-[#171C3C]">5</h3>
-                    <p className="text-sm text-[#171C3C]/60">Purchases</p>
-                    <p className="text-xs text-[#FE9E8F] mt-2 font-semibold">View Orders →</p>
-                </div>
-
-                <div className="bg-white p-6 rounded-xl border border-[#171C3C]/20 hover:shadow-lg transition-shadow">
-                    <Activity className="w-8 h-8 text-[#171C3C]/60 mb-3" />
-                    <h3 className="text-2xl font-bold text-[#171C3C]">Active</h3>
-                    <p className="text-sm text-[#171C3C]/60">Account Status</p>
+                {/* Search Bar Mockup */}
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#171C3C]/50" />
+                    <input
+                        type="text"
+                        placeholder="Search artworks, events..."
+                        className="pl-10 pr-4 py-2 bg-white border border-[#D1CAF2]/40 rounded-lg text-sm focus:outline-none focus:border-[#98C4EC] transition-colors w-64 text-[#171C3C]"
+                    />
                 </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div
-                    onClick={() => onNavigate && onNavigate('My Orders')}
-                    className="bg-gradient-to-br from-[#FE9E8F]/10 to-[#FE9E8F]/5 rounded-2xl border border-[#FE9E8F]/40 p-8 hover:shadow-xl transition-all cursor-pointer group"
-                >
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <Package className="w-12 h-12 text-[#FE9E8F] mb-4 group-hover:scale-110 transition-transform" />
-                            <h2 className="text-2xl font-bold text-[#171C3C] mb-2">My Orders</h2>
-                            <p className="text-[#171C3C]/60 mb-4">Track your purchases and order status</p>
-                            <button className="px-6 py-2 bg-[#FE9E8F] text-white rounded-lg hover:bg-[#fe8e7f] transition-colors font-semibold">
-                                View All Orders →
-                            </button>
+            {/* Stats Grid (Admin Dashboard Style) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                {dashboardStats.map((stat, index) => (
+                    <div
+                        key={index}
+                        onClick={() => stat.navTarget && onNavigate && onNavigate(stat.navTarget)}
+                        className={`flex flex-col transition-transform duration-200 ${stat.navTarget ? 'cursor-pointer hover:scale-[1.02]' : 'hover:scale-[1.02]'}`}
+                    >
+                        <h3 className="text-xl font-semibold text-[#171C3C] mb-4 pl-1">{stat.title}</h3>
+                        <div className="flex items-center gap-4 px-2">
+                            {/* Vertical Half-Pill Bar */}
+                            <div className={`w-2.5 h-16 rounded-l-full rounded-r-none ${stat.barColor} shrink-0`}></div>
+                            <div className="flex gap-8 w-full pr-4">
+                                {stat.items.map((item, idx) => (
+                                    <div key={idx} className="flex flex-col justify-center">
+                                        <span className="text-sm text-[#171C3C]/60 font-medium whitespace-nowrap mb-1">{item.label}</span>
+                                        <span className="text-xl font-semibold text-[#171C3C] tracking-tight">{item.value}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Recent Acquisitions - Styled like Admin Recent Orders */}
+                <div className="bg-[#98C4EC]/10 rounded-2xl border border-[#98C4EC]/40 overflow-hidden shadow-sm flex flex-col h-full">
+                    <div className="p-6 border-b border-[#98C4EC]/30 flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-[#171C3C]">Recent Orders</h2>
+                        <button onClick={() => onNavigate && onNavigate('My Orders')} className="text-sm text-[#171C3C] hover:text-[#98C4EC] transition-colors font-medium">View All</button>
+                    </div>
+                    <div className="flex flex-col">
+                        {orders.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-12 px-8">
+                                <Package className="w-10 h-10 text-[#98C4EC]/50 mb-3" />
+                                <p className="text-[#171C3C]/50 text-sm font-medium text-center">Your collection history is empty.</p>
+                            </div>
+                        ) : (
+                            orders.slice(0, 4).map((order) => (
+                                <div key={order._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-white/60 transition-all duration-200 cursor-pointer border-b border-[#98C4EC]/20 last:border-0 hover:pl-6 gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-lg bg-[#98C4EC]/20 flex items-center justify-center overflow-hidden shrink-0 p-1">
+                                            {order.items[0]?.thumbnail ? (
+                                                <img src={order.items[0].thumbnail} alt="Product" className="w-full h-full object-cover rounded" />
+                                            ) : (
+                                                <ShoppingBag className="w-5 h-5 text-[#171C3C]/60" />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-[#171C3C] text-sm truncate max-w-[150px] sm:max-w-[200px]">
+                                                {order.items.length === 1 ? order.items[0]?.productname || 'Artwork' : `${order.items.length} Artworks`}
+                                            </h4>
+                                            <p className="text-xs text-[#171C3C]/60 mt-0.5 whitespace-nowrap">
+                                                Order #{order._id.slice(-6).toUpperCase()}  <span className="text-[#171C3C] font-semibold tracking-tight">₹{order.totalAmount}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3 self-end sm:self-auto">
+                                        <span className="text-xs text-[#171C3C]/50 whitespace-nowrap hidden sm:block">
+                                            {new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                        </span>
+                                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${order.orderStatus === 'Delivered' ? 'bg-[#4ADE80]/20 text-green-700' : order.orderStatus === 'Processing' ? 'bg-[#98C4EC]/30 text-blue-700' : 'bg-[#FE9E8F]/20 text-[#FE9E8F]'}`}>
+                                            {order.orderStatus}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-[#98C4EC]/10 to-[#D1CAF2]/10 rounded-2xl border border-[#98C4EC]/40 p-8 hover:shadow-xl transition-all">
-                    <Activity className="w-12 h-12 text-[#98C4EC] mb-4" />
-                    <h2 className="text-2xl font-bold text-[#171C3C] mb-2">Your Activity</h2>
-                    <p className="text-[#171C3C]/60">Track your interactions with artworks, purchases, and favorites</p>
+                {/* Upcoming Schedule - Styled like Admin Pending Activities/Events */}
+                <div className="bg-[#D1CAF2]/10 rounded-2xl border border-[#D1CAF2]/40 overflow-hidden shadow-sm flex flex-col h-full">
+                    <div className="p-6 border-b border-[#D1CAF2]/30 flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-[#171C3C]">Upcoming Schedule</h2>
+                        <button onClick={() => onNavigate && onNavigate('Events')} className="text-sm text-[#171C3C] hover:text-[#D1CAF2] transition-colors font-medium">View All</button>
+                    </div>
+                    <div className="flex flex-col">
+                        {registrations.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-12 px-8">
+                                <CalendarIcon className="w-10 h-10 text-[#D1CAF2]/70 mb-3" />
+                                <p className="text-[#171C3C]/50 text-sm font-medium text-center">You haven't booked any events yet.</p>
+                            </div>
+                        ) : (
+                            registrations.slice(0, 4).map((reg) => (
+                                <div key={reg._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-white/60 transition-all duration-200 cursor-pointer border-b border-[#D1CAF2]/20 last:border-0 hover:pl-6 gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-lg bg-[#D1CAF2]/30 flex flex-col items-center justify-center shrink-0 border border-[#D1CAF2]/40">
+                                            <span className="text-[8px] font-bold text-[#171C3C]/70 leading-none uppercase mb-0.5">{reg.eventId?.startDate ? new Date(reg.eventId.startDate).toLocaleDateString(undefined, { month: 'short' }) : 'TBA'}</span>
+                                            <span className="text-sm font-black text-[#171C3C] leading-none">{reg.eventId?.startDate ? new Date(reg.eventId.startDate).getDate() : '-'}</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-[#171C3C] text-sm truncate max-w-[150px] sm:max-w-[200px]">
+                                                {reg.eventId?.title || 'Unknown Event'}
+                                            </h4>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-[9px] px-1.5 py-0.5 bg-white rounded font-bold text-[#FE9E8F] uppercase tracking-wider border border-[#FE9E8F]/20">
+                                                    {reg.eventId?.eventType || 'Event'}
+                                                </span>
+                                                <p className="text-xs text-[#171C3C]/60 flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" /> {reg.eventId?.startTime || 'TBA'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3 self-end sm:self-auto">
+                                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${reg.paymentStatus === 'free' ? 'bg-[#4ADE80]/20 text-green-700' : 'bg-gray-200 text-gray-700'}`}>
+                                            {reg.paymentStatus === 'free' ? 'Free' : 'Paid'}
+                                        </span>
+                                        <span className="text-xs font-semibold text-[#171C3C] bg-white px-2 py-1 rounded border border-[#D1CAF2]/30 shadow-sm whitespace-nowrap">
+                                            {reg.tickets} Tkt.
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
+
             </div>
         </div>
     );

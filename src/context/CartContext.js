@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
@@ -8,47 +8,59 @@ export function CartProvider({ children }) {
     const [cart, setCart] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Load cart from localStorage on mount
+    // Load cart from sessionStorage on mount
     useEffect(() => {
-        const savedCart = localStorage.getItem('artistry_cart');
+        const savedCart = sessionStorage.getItem('artistry_cart');
         if (savedCart) {
             try {
                 setCart(JSON.parse(savedCart));
             } catch (error) {
-                console.error('Failed to parse cart from localStorage:', error);
-                localStorage.removeItem('artistry_cart');
+                console.error('Failed to parse cart from sessionStorage:', error);
+                sessionStorage.removeItem('artistry_cart');
             }
         }
         setIsLoaded(true);
     }, []);
 
-    // Save cart to localStorage whenever it changes
+    // Save cart to sessionStorage whenever it changes
     useEffect(() => {
         if (isLoaded) {
-            localStorage.setItem('artistry_cart', JSON.stringify(cart));
+            try {
+                sessionStorage.setItem('artistry_cart', JSON.stringify(cart));
+            } catch (error) {
+                console.warn('Storage quota exceeded. Saving minimal cart.');
+                try {
+                    // Strip huge base64 fields if quota is exceeded
+                    const minimalCart = cart.map(item => {
+                        const { images, thumbnail, ...rest } = item;
+                        return rest;
+                    });
+                    sessionStorage.setItem('artistry_cart', JSON.stringify(minimalCart));
+                } catch (fallbackError) {
+                    console.error('Failed to save minimal cart:', fallbackError);
+                }
+            }
         }
     }, [cart, isLoaded]);
 
     // Add item to cart
     const addToCart = (product) => {
-        setCart(prevCart => {
-            // Check if product already in cart
-            const existingItem = prevCart.find(item => item._id === product._id);
+        // Check if product already in cart using the current cart state
+        const existingItem = cart.find(item => item._id === product._id);
 
-            if (existingItem) {
-                toast.error('Product already in cart');
-                return prevCart;
-            }
+        if (existingItem) {
+            toast.error('Product already in cart');
+            return;
+        }
 
-            // Check stock availability
-            if (!product.inStock || product.stock < 1) {
-                toast.error('Product is out of stock');
-                return prevCart;
-            }
+        // Check stock availability
+        if (!product.inStock || product.stock < 1) {
+            toast.error('Product is out of stock');
+            return;
+        }
 
-            toast.success('Added to cart!');
-            return [...prevCart, { ...product, quantity: 1 }];
-        });
+        setCart(prevCart => [...prevCart, { ...product, quantity: 1 }]);
+        toast.success('Added to cart!');
     };
 
     // Remove item from cart
@@ -92,7 +104,7 @@ export function CartProvider({ children }) {
     // Clear cart
     const clearCart = () => {
         setCart([]);
-        localStorage.removeItem('artistry_cart');
+        sessionStorage.removeItem('artistry_cart');
         toast.success('Cart cleared');
     };
 

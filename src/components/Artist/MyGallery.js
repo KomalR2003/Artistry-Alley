@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
 import { Images, Image, Heart, Eye, Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import AddGalleryImageForm from './AddGalleryImageForm';
@@ -21,12 +21,12 @@ const MyGallery = () => {
   });
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    const userRole = localStorage.getItem('userRole');
-    const username = localStorage.getItem('username');
+    const userId = sessionStorage.getItem('userId');
+    const userRole = sessionStorage.getItem('userRole');
+    const username = sessionStorage.getItem('username');
 
     // Debug logging
-    console.log('MyGallery - localStorage values:', {
+    console.log('MyGallery - sessionStorage values:', {
       userId,
       userRole,
       username
@@ -40,7 +40,7 @@ const MyGallery = () => {
     } else {
       setLoading(false);
       setError('Please log in to view your gallery.');
-      console.error('No userId found in localStorage');
+      console.error('No userId found in sessionStorage');
     }
   }, []);
 

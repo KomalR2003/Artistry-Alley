@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,7 @@ import {
   Heart,
   Star,
   TrendingUp,
+  Camera,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -37,6 +38,7 @@ export default function Register() {
     specialization: "",
     portfolio: "",
     bio: "",
+    profilePicture: "",
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -56,6 +58,48 @@ export default function Register() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit before compression
+        toast.error("Original image size must be less than 50MB");
+        return;
+      }
+
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const base64String = canvas.toDataURL('image/jpeg', 0.7);
+        update("profilePicture", base64String);
+      };
+    }
+  };
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -63,7 +107,7 @@ export default function Register() {
       const res = await axios.post("/api/auth/register", form);
 
       if (res.data?.success) {
-        toast.success("Registered Successfully! 🎉");
+        toast.success("Registered Successfully! ðŸŽ‰");
         router.push("/login");
       } else {
         toast.error(res.data?.error ?? "Registration failed");
@@ -238,11 +282,41 @@ export default function Register() {
               {/* Account Information Card */}
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#98C4EC]/30 transition-all duration-300">
                 <h3 className="text-lg font-bold text-[#171C3C] mb-4 flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#98C4EC]  flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-[#98C4EC] flex items-center justify-center">
                     <User size={16} className="text-white" />
                   </div>
                   Account Information
                 </h3>
+
+                {/* Profile Picture Upload */}
+                <div className="flex justify-center mb-6">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg flex items-center justify-center relative group cursor-pointer">
+                      {form.profilePicture ? (
+                        <img
+                          src={form.profilePicture}
+                          alt="Profile Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-gray-400 flex flex-col items-center">
+                          <User size={32} />
+                        </div>
+                      )}
+
+                      <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white">
+                        <Camera size={20} className="mb-1" />
+                        <span className="text-[10px] font-semibold">Upload</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="space-y-4">
                   <div>
@@ -392,8 +466,8 @@ export default function Register() {
                   Select Your Role *
                 </h3>
 
-                <div className="grid grid-cols-3 gap-3">
-                  {["user", "artist", "admin"].map((role) => (
+                <div className="grid grid-cols-2 gap-3">
+                  {["user", "artist"].map((role) => (
                     <button
                       key={role}
                       type="button"

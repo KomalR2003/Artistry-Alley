@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Loader2 } from 'lucide-react';
 
@@ -17,19 +17,19 @@ const AddGalleryImageForm = ({ isOpen, onClose, onImageAdded }) => {
     const [artistId, setArtistId] = useState(null);
     const [artistName, setArtistName] = useState('');
 
-    // Automatically fetch artistId and artistName from localStorage
+    // Automatically fetch artistId and artistName from sessionStorage
     useEffect(() => {
         if (isOpen) {
-            const userId = localStorage.getItem('userId');
-            const username = localStorage.getItem('username');
+            const userId = sessionStorage.getItem('userId');
+            const username = sessionStorage.getItem('username');
 
             if (userId) {
                 setArtistId(userId);
                 setArtistName(username || 'Artist');
-                console.log('Artist ID fetched from localStorage:', userId);
+                console.log('Artist ID fetched from sessionStorage:', userId);
             } else {
                 setError('Unable to identify artist. Please log in again.');
-                console.error('No userId found in localStorage');
+                console.error('No userId found in sessionStorage');
             }
         }
     }, [isOpen]);

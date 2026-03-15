@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -152,7 +152,7 @@ export default function Home({ onNavigate }) {
 
                             {/* Floating badge */}
                             <div className="absolute -bottom-4 -left-4 bg-white px-6 py-3 rounded-2xl shadow-xl border-2 border-[#98C4EC]/30 animate-bounce">
-                                <div className="text-2xl font-bold text-[#171C3C]">🎨</div>
+                                {/* <div className="text-2xl font-bold text-[#171C3C]">ðŸŽ¨</div> */}
                                 <div className="text-sm font-semibold text-gray-700">Featured</div>
                             </div>
                         </div>

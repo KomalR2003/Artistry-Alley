@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,8 +45,8 @@ export default function Navbar({ onNavigate, activeView }) {
     };
 
     const handleLogout = () => {
-        // Clear localStorage
-        localStorage.clear();
+        // Clear sessionStorage
+        sessionStorage.clear();
         // Close modal
         setIsLogoutModalOpen(false);
         // Redirect to login page

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState } from 'react';
 import { X, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -74,13 +74,44 @@ const AddProductForm = ({ isOpen, onClose, onProductAdded, artistId, artistName 
         const base64Images = [];
 
         files.forEach(file => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result;
+            if (file.size > 50 * 1024 * 1024) {
+                toast.error(`Image ${file.name} is too large. Max 50MB allowed.`);
+                return;
+            }
+
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 800; // slightly larger for products
+                const MAX_HEIGHT = 800;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const base64String = canvas.toDataURL('image/jpeg', 0.8);
+
                 previews.push(base64String);
                 base64Images.push(base64String);
 
-                if (previews.length === files.length) {
+                if (previews.length === files.filter(f => f.size <= 50 * 1024 * 1024).length) {
                     setImagePreviews(prev => [...prev, ...previews]);
                     setFormData(prev => ({
                         ...prev,
@@ -88,23 +119,52 @@ const AddProductForm = ({ isOpen, onClose, onProductAdded, artistId, artistName 
                     }));
                 }
             };
-            reader.readAsDataURL(file);
         });
     };
 
     const handleThumbnailUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result;
+            if (file.size > 50 * 1024 * 1024) {
+                toast.error("Thumbnail is too large. Max 50MB allowed.");
+                return;
+            }
+
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 600;
+                const MAX_HEIGHT = 600;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const base64String = canvas.toDataURL('image/jpeg', 0.8);
+
                 setThumbnailPreview(base64String);
                 setFormData(prev => ({
                     ...prev,
                     thumbnail: base64String
                 }));
             };
-            reader.readAsDataURL(file);
         }
     };
 

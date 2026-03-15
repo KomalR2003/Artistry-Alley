@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React from 'react';
 import { X } from 'lucide-react';
 
@@ -166,12 +166,12 @@ const ViewProductModal = ({ isOpen, onClose, product }) => {
                                     <div className="flex gap-2 pt-4">
                                         {product.featured && (
                                             <span className="px-3 py-1 bg-[#171C3C] text-white rounded-lg text-sm font-medium">
-                                                ⭐ Featured
+                                                â­ Featured
                                             </span>
                                         )}
                                         {product.bestseller && (
                                             <span className="px-3 py-1 bg-[#FE9E8F] text-white rounded-lg text-sm font-medium">
-                                                🔥 Bestseller
+                                                ðŸ”¥ Bestseller
                                             </span>
                                         )}
                                     </div>

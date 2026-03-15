@@ -1,4 +1,4 @@
-import { Poppins } from "next/font/google";
+﻿import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { CartProvider } from "@/context/CartContext";
@@ -17,9 +17,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${poppins.className} antialiased`}
+        suppressHydrationWarning
       >
         <CartProvider>
           {children}

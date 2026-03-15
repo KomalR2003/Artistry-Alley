@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, Search, Filter, X, Loader2, IndianRupee, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -10,6 +10,28 @@ export default function Events() {
     const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedType, setSelectedType] = useState('all');
+
+    // Registration State
+    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [registrationData, setRegistrationData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        tickets: 1
+    });
+
+    // Load Razorpay Script
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     const [stats, setStats] = useState({
         total: 0,
@@ -91,243 +113,538 @@ export default function Events() {
         setSelectedType('all');
     };
 
+    const openRegisterModal = (evt) => {
+        setSelectedEvent(evt);
+        setIsRegisterModalOpen(true);
+        // Reset form or prepopulate if user is logged in (optional implementation)
+        setRegistrationData({ name: '', email: '', phone: '', tickets: 1 });
+    };
+
+    const handleRegistrationChange = (e) => {
+        const { name, value } = e.target;
+        setRegistrationData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleRegistrationSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!registrationData.name || !registrationData.email || !registrationData.phone) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
+        setIsProcessing(true);
+
+        try {
+            if (selectedEvent.isFree) {
+                // Free Event Flow
+                toast.loading('Registering...', { id: 'evt-reg' });
+                const res = await fetch('/api/events/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        eventId: selectedEvent._id,
+                        customerDetails: registrationData,
+                        tickets: registrationData.tickets,
+                        isFree: true,
+                        totalAmount: 0
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    toast.success('Registration successful! Check your email.', { id: 'evt-reg' });
+                    setIsRegisterModalOpen(false);
+                } else {
+                    throw new Error(data.error || 'Registration failed');
+                }
+                setIsProcessing(false);
+            } else {
+                // Paid Event Flow
+                const amount = selectedEvent.price * registrationData.tickets;
+
+                // 1. Create order
+                const res = await fetch('/api/payment/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to initialize payment');
+                }
+
+                const rzpKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+
+                if (data.isMock || !rzpKey || rzpKey === 'undefined' || rzpKey.includes('placeholder')) {
+                    toast.success('Mock Payment Processing...', { id: 'evt-reg' });
+
+                    await new Promise(r => setTimeout(r, 1500));
+
+                    const verifyRes = await fetch('/api/events/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            eventId: selectedEvent._id,
+                            customerDetails: registrationData,
+                            tickets: registrationData.tickets,
+                            totalAmount: amount,
+                            isFree: false,
+                            isMock: true,
+                            razorpay_order_id: data.order.id,
+                            razorpay_payment_id: `mock_pay_${Date.now()}`,
+                            razorpay_signature: 'mock_signature'
+                        })
+                    });
+
+                    const verifyData = await verifyRes.json();
+                    if (verifyRes.ok && verifyData.success) {
+                        toast.success('Registration and mock payment successful!', { id: 'evt-reg' });
+                        closeRegisterModal();
+                        fetchEvents(); // Refresh to update tickets
+                    } else {
+                        throw new Error(verifyData.error || 'Payment verification failed');
+                    }
+                    setIsProcessing(false);
+                    return;
+                }
+
+                // 2. Open Razorpay
+                const options = {
+                    key: rzpKey,
+                    amount: data.order.amount,
+                    currency: data.order.currency,
+                    name: "Artistry Gallery Events",
+                    description: `Registration for ${selectedEvent.title}`,
+                    image: "/logo.png",
+                    order_id: data.order.id,
+                    handler: async function (response) {
+                        try {
+                            toast.loading('Verifying payment...', { id: 'evt-reg' });
+                            const verifyRes = await fetch('/api/events/register', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    eventId: selectedEvent._id,
+                                    customerDetails: registrationData,
+                                    tickets: registrationData.tickets,
+                                    totalAmount: amount,
+                                    isFree: false,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature
+                                })
+                            });
+
+                            const verifyData = await verifyRes.json();
+                            if (verifyRes.ok && verifyData.success) {
+                                toast.success('Ticket booked successfully! Check your email.', { id: 'evt-reg' });
+                                setIsRegisterModalOpen(false);
+                            } else {
+                                throw new Error(verifyData.error || 'Payment verification failed');
+                            }
+                        } catch (err) {
+                            toast.error(err.message || 'Error processing registration', { id: 'evt-reg' });
+                        } finally {
+                            setIsProcessing(false);
+                        }
+                    },
+                    prefill: {
+                        name: registrationData.name,
+                        email: registrationData.email,
+                        contact: registrationData.phone
+                    },
+                    theme: { color: "#171C3C" },
+                    modal: {
+                        ondismiss: function () {
+                            setIsProcessing(false);
+                            toast.error('Payment cancelled');
+                        }
+                    }
+                };
+
+                const rzp = new window.Razorpay(options);
+                rzp.on('payment.failed', function (response) {
+                    setIsProcessing(false);
+                    toast.error(response.error.description || 'Payment Failed');
+                });
+                rzp.open();
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            toast.error(error.message || 'Registration failed. Please try again.');
+            setIsProcessing(false);
+        }
+    };
+
     return (
-        <div className="w-full h-full bg-white text-[#171C3C] p-8 overflow-y-auto">
-            {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#171C3C] via-[#98C4EC] to-[#FE9E8F]">
-                    Events & Exhibitions
-                </h1>
-                <p className="text-[#171C3C]/70 mt-2">
-                    Discover upcoming art exhibitions, workshops, and community events.
-                </p>
-            </div>
+        <div className="w-full h-full bg-[#FAFAFC] text-[#171C3C] p-6 md:p-10 overflow-y-auto relative">
+            {/* Ambient Background Glows */}
+            <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-br from-[#FE9E8F]/10 via-[#D1CAF2]/10 to-transparent pointer-events-none z-0"></div>
+            <div className="fixed top-0 right-0 w-96 h-96 bg-[#98C4EC]/10 rounded-full blur-3xl pointer-events-none z-0"></div>
 
-            {/* Quick Stats - Dashboard Style with Groups (Matching Artist Side) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 mb-10">
-                {/* Event Stats Group */}
-                <div className="flex flex-col">
-                    <h3 className="text-xl font-semibold text-[#171C3C] mb-4 pl-1">Event Overview</h3>
-                    <div className="flex items-center gap-4 px-2">
-                        <div className="w-2.5 h-16 rounded-l-full rounded-r-none bg-[#FE9E8F] shrink-0"></div>
-                        <div className="flex gap-8">
-                            <div className="flex flex-col justify-center">
-                                <span className="text-sm text-[#171C3C]/60 font-medium whitespace-nowrap mb-1">Total Upcoming</span>
-                                <span className="text-2xl font-semibold text-[#171C3C] tracking-tight">{stats.total}</span>
-                            </div>
-                            <div className="flex flex-col justify-center">
-                                <span className="text-sm text-[#171C3C]/60 font-medium whitespace-nowrap mb-1">Exhibitions</span>
-                                <span className="text-2xl font-semibold text-[#171C3C] tracking-tight">{stats.exhibitions}</span>
-                            </div>
+            <div className="relative z-10 max-w-7xl mx-auto">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-8">
+                    <div className="max-w-2xl">
+                        <div className="inline-block mb-3 px-3 py-1 rounded-full bg-[#171C3C] text-white text-xs font-bold tracking-widest uppercase shadow-md shadow-[#171C3C]/20">
+                            Happenings
+                        </div>
+                        <h1 className="text-5xl md:text-6xl font-extrabold text-[#171C3C] tracking-tight mb-4">
+                            Exclusive <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#98C4EC] to-[#FE9E8F]">Events</span>
+                        </h1>
+                        <p className="text-[#171C3C]/60 text-lg leading-relaxed font-medium">
+                            Join our prestigious art exhibitions, exclusive workshops, and captivating gallery nights.
+                        </p>
+                    </div>
+
+                    {/* Premium Stats Pill */}
+                    <div className="flex gap-8 bg-white/80 backdrop-blur-md px-8 py-5 rounded-3xl border border-white shadow-[0_8px_30px_rgb(23,28,60,0.06)]">
+                        <div className="flex flex-col items-center">
+                            <span className="text-3xl font-black text-[#171C3C]">{stats.total}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#171C3C]/50 mt-1">Upcoming</span>
+                        </div>
+                        <div className="w-px h-12 bg-gradient-to-b from-transparent via-[#171C3C]/10 to-transparent"></div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-3xl font-black text-[#171C3C]">{stats.exhibitions}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#171C3C]/50 mt-1">Exhibits</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Entry Group */}
-                <div className="flex flex-col">
-                    <h3 className="text-xl font-semibold text-[#171C3C] mb-4 pl-1">Entry Types</h3>
-                    <div className="flex items-center gap-4 px-2">
-                        <div className="w-2.5 h-16 rounded-l-full rounded-r-none bg-[#98C4EC] shrink-0"></div>
-                        <div className="flex gap-8">
-                            <div className="flex flex-col justify-center">
-                                <span className="text-sm text-[#171C3C]/60 font-medium whitespace-nowrap mb-1">Free Entry</span>
-                                <span className="text-2xl font-semibold text-[#171C3C] tracking-tight">{stats.freeEvents}</span>
-                            </div>
-                            <div className="flex flex-col justify-center">
-                                <span className="text-sm text-[#171C3C]/60 font-medium whitespace-nowrap mb-1">Paid Entry</span>
-                                <span className="text-2xl font-semibold text-[#171C3C] tracking-tight">{stats.paidEvents}</span>
-                            </div>
+                {/* Filters & Search - Sleek design */}
+                <div className="flex flex-col lg:flex-row gap-4 mb-12 items-center bg-white/80 backdrop-blur-xl p-3 rounded-3xl shadow-[0_8px_30px_rgb(23,28,60,0.04)] border border-white sticky top-4 z-20">
+                    {/* Search */}
+                    <div className="flex-1 relative w-full group">
+                        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#171C3C]/40 group-focus-within:text-[#98C4EC] transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Discover events, artists, or locations..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-14 pr-6 py-4 bg-transparent border-none focus:outline-none focus:ring-0 text-[#171C3C] placeholder-[#171C3C]/40 font-medium text-lg"
+                        />
+                    </div>
+
+                    {/* Type Filters Pill Layout */}
+                    <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 scrollbar-hide border-t lg:border-t-0 lg:border-l border-[#171C3C]/10 px-2 lg:pl-4">
+                        <div className="flex gap-2 min-w-max items-center py-2 lg:py-0">
+                            {[
+                                { id: 'all', label: 'All Events' },
+                                { id: 'Event', label: 'Workshops & Events' },
+                                { id: 'Exhibition', label: 'Gallery Exhibits' }
+                            ].map(type => (
+                                <button
+                                    key={type.id}
+                                    onClick={() => setSelectedType(type.id)}
+                                    className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 ${selectedType === type.id
+                                        ? 'bg-[#171C3C] text-white shadow-lg shadow-[#171C3C]/20 scale-100'
+                                        : 'bg-transparent text-[#171C3C]/60 hover:bg-[#D1CAF2]/20 hover:text-[#171C3C] scale-95 hover:scale-100'
+                                        }`}
+                                >
+                                    {type.label}
+                                </button>
+                            ))}
+                            {(searchQuery || selectedType !== 'all') && (
+                                <button
+                                    onClick={clearFilters}
+                                    className="ml-2 p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all duration-300"
+                                    title="Clear Filters"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Filters & Search */}
-            <div className="mb-8 flex flex-col md:flex-row gap-4">
-                {/* Search Bar */}
-                <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#171C3C]/40" />
-                    <input
-                        type="text"
-                        placeholder="Search events, artists, or locations..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#98C4EC] focus:ring-2 focus:ring-[#98C4EC]/20 transition-all"
-                    />
-                </div>
+                {/* Events Display */}
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center p-24 h-[50vh]">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-[#D1CAF2]/20 rounded-full"></div>
+                            <div className="w-16 h-16 border-4 border-[#98C4EC] rounded-full border-t-transparent animate-spin absolute top-0 left-0"></div>
+                        </div>
+                        <p className="mt-4 text-[#171C3C]/60 font-medium animate-pulse">Loading schedule...</p>
+                    </div>
+                ) : error ? (
+                    <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-700 px-6 py-4 rounded-2xl flex items-center gap-4">
+                        <X className="w-6 h-6" />
+                        <span className="font-medium">{error}</span>
+                    </div>
+                ) : filteredEvents.length === 0 ? (
+                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white p-20 text-center shadow-[0_8px_30px_rgb(23,28,60,0.04)]">
+                        <div className="w-24 h-24 bg-gradient-to-br from-[#FE9E8F] to-[#D1CAF2] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#FE9E8F]/40">
+                            <Calendar className="w-10 h-10 text-white" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-[#171C3C] mb-3">No Upcoming Events</h2>
+                        <p className="text-[#171C3C]/60 mb-8 text-lg max-w-md mx-auto">
+                            {events.length === 0
+                                ? 'We are currently planning our next magnificent events. Check back soon.'
+                                : 'We couldn\'t find any events matching your criteria.'}
+                        </p>
+                        {(searchQuery || selectedType !== 'all') && (
+                            <button
+                                onClick={clearFilters}
+                                className="px-8 py-4 bg-[#171C3C] text-white rounded-2xl hover:bg-[#171C3C]/90 transition-all font-bold inline-flex items-center gap-3 shadow-xl shadow-[#171C3C]/20"
+                            >
+                                <Filter className="w-5 h-5" />
+                                View All Events
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-8">
+                        {filteredEvents.map((evt) => (
+                            <div
+                                key={evt._id}
+                                className="group relative flex flex-col md:flex-row bg-white rounded-[1.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 border border-gray-100 min-h-[160px]"
+                            >
+                                {/* Left Side: Image */}
+                                <div className="w-full md:w-[25%] relative bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20 overflow-hidden shrink-0">
+                                    {evt.image ? (
+                                        <img
+                                            src={evt.image}
+                                            alt={evt.title}
+                                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                                        />
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full min-h-[160px]">
+                                            <div className="w-16 h-16 bg-[#171C3C]/5 rounded-2xl flex items-center justify-center">
+                                                <ImageIcon className="w-8 h-8 text-[#171C3C]/20" />
+                                            </div>
+                                        </div>
+                                    )}
 
-                {/* Type Filter */}
-                <div className="relative">
-                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#171C3C]/40 pointer-events-none" />
-                    <select
-                        value={selectedType}
-                        onChange={(e) => setSelectedType(e.target.value)}
-                        className="pl-10 pr-8 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#98C4EC] focus:ring-2 focus:ring-[#98C4EC]/20 transition-all appearance-none bg-white cursor-pointer min-w-[200px]"
-                    >
-                        <option value="all">All Event Types</option>
-                        <option value="Event">Events</option>
-                        <option value="Exhibition">Exhibitions</option>
-                    </select>
-                </div>
-
-                {/* Clear Filters */}
-                {(searchQuery || selectedType !== 'all') && (
-                    <button
-                        onClick={clearFilters}
-                        className="flex items-center gap-2 px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium"
-                    >
-                        <X className="w-5 h-5" />
-                        Clear
-                    </button>
-                )}
-            </div>
-
-            {/* Events Grid */}
-            {loading ? (
-                <div className="flex items-center justify-center p-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#98C4EC]" />
-                </div>
-            ) : error ? (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    {error}
-                </div>
-            ) : filteredEvents.length === 0 ? (
-                <div className="bg-[#98C4EC]/10 rounded-2xl border border-[#98C4EC]/40 p-12 text-center">
-                    <Calendar className="w-16 h-16 text-[#98C4EC] mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-[#171C3C] mb-2">No Events Found</h2>
-                    <p className="text-[#171C3C]/60 mb-6">
-                        {events.length === 0
-                            ? 'No upcoming events or exhibitions at the moment'
-                            : 'Try adjusting your filters or search query'}
-                    </p>
-                    {(searchQuery || selectedType !== 'all') && (
-                        <button
-                            onClick={clearFilters}
-                            className="px-6 py-3 bg-[#171C3C] text-white rounded-xl hover:bg-[#171C3C]/90 transition-all font-medium inline-flex items-center gap-2"
-                        >
-                            <X className="w-5 h-5" />
-                            Clear Filters
-                        </button>
-                    )}
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-                    {filteredEvents.map((evt) => (
-                        <div
-                            key={evt._id}
-                            className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all group flex flex-col h-full"
-                        >
-                            {/* Image Placeholder */}
-                            <div className="relative h-56 bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20 overflow-hidden shrink-0">
-                                {evt.image ? (
-                                    <img
-                                        src={evt.image}
-                                        alt={evt.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                    />
-                                ) : (
-                                    <div className="flex items-center justify-center h-full">
-                                        <ImageIcon className="w-16 h-16 text-[#98C4EC]/40" />
+                                    {/* Event Type Badge */}
+                                    <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                                        <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm ${evt.eventType === 'Exhibition'
+                                            ? 'bg-[#FE9E8F] text-white'
+                                            : 'bg-[#98C4EC] text-white'
+                                            }`}>
+                                            {evt.eventType}
+                                        </span>
                                     </div>
-                                )}
 
-                                {/* Type Badge */}
-                                <div className="absolute top-4 left-4">
-                                    <span className={`px-4 py-1.5 rounded-full text-xs font-bold shadow-sm ${evt.eventType === 'Exhibition'
-                                        ? 'bg-[#FE9E8F] text-white'
-                                        : 'bg-[#98C4EC] text-white'
-                                        }`}>
-                                        {evt.eventType}
-                                    </span>
-                                </div>
-                                {/* Free/Paid Badge */}
-                                <div className="absolute top-4 right-4">
-                                    <span className={`px-4 py-1.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-1 ${evt.isFree
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-yellow-100 text-yellow-700'
-                                        }`}>
-                                        {evt.isFree ? 'Free' : `₹${evt.price}`}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Event Details */}
-                            <div className="p-6 flex-1 flex flex-col">
-                                <div className="mb-4">
-                                    <h3 className="font-bold text-[#171C3C] text-xl mb-1 line-clamp-1 truncate" title={evt.title}>
-                                        {evt.title}
-                                    </h3>
+                                    {/* Host Info Float */}
                                     {evt.artistId?.username && (
-                                        <p className="text-sm text-[#171C3C]/60 font-medium">Hosted by <span className="text-[#171C3C] underline decoration-[#98C4EC] decoration-2 underline-offset-2">{evt.artistId.username}</span></p>
+                                        <div className="absolute bottom-4 left-4 z-10 bg-white/90 backdrop-blur-md px-3 py-2 rounded-lg shadow-sm flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#171C3C] to-[#98C4EC] flex items-center justify-center text-white font-bold text-[10px] uppercase">
+                                                {evt.artistId.username[0]}
+                                            </div>
+                                            <div>
+                                                <p className="text-[8px] font-bold text-[#171C3C]/50 uppercase tracking-widest">Host</p>
+                                                <p className="text-xs font-bold text-[#171C3C] truncate max-w-[80px]">{evt.artistId.username}</p>
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
 
-                                <div className="space-y-3 mb-5">
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-0.5 w-8 h-8 rounded-full bg-[#171C3C]/5 flex items-center justify-center shrink-0">
-                                            <Calendar className="w-4 h-4 text-[#98C4EC]" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-[#171C3C]">Date</p>
-                                            <p className="text-sm text-[#171C3C]/70">
-                                                {new Date(evt.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                {new Date(evt.startDate).getTime() !== new Date(evt.endDate).getTime() &&
-                                                    ` - ${new Date(evt.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-0.5 w-8 h-8 rounded-full bg-[#171C3C]/5 flex items-center justify-center shrink-0">
-                                            <Clock className="w-4 h-4 text-[#D1CAF2]" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-[#171C3C]">Time</p>
-                                            <p className="text-sm text-[#171C3C]/70 w-full">
-                                                {evt.startTime} - {evt.endTime}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-0.5 w-8 h-8 rounded-full bg-[#171C3C]/5 flex items-center justify-center shrink-0">
-                                            <MapPin className="w-4 h-4 text-[#FE9E8F]" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-[#171C3C]">Location</p>
-                                            <p className="text-sm text-[#171C3C]/70 line-clamp-2" title={evt.location}>
-                                                {evt.location}
-                                            </p>
-                                        </div>
-                                    </div>
+                                {/* Horizontal Dashed Separator Line & Cutouts (visible on mobile only) */}
+                                <div className="md:hidden flex flex-row items-center justify-between relative py-0 z-10 bg-white">
+                                    <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-6 h-6 bg-[#FAFAFC] rounded-full shadow-inner border-r border-[#171C3C]/5"></div>
+                                    <div className="w-full border-b-2 border-dashed border-[#171C3C]/10 h-[2px]"></div>
+                                    <div className="absolute right-[-12px] top-1/2 -translate-y-1/2 w-6 h-6 bg-[#FAFAFC] rounded-full shadow-inner border-l border-[#171C3C]/5"></div>
                                 </div>
 
-                                {/* Description */}
-                                <div className="mt-auto pt-4 border-t border-gray-100">
-                                    <p className="text-sm text-[#171C3C]/70 line-clamp-3 mb-4 min-h-[60px]">
+                                {/* Middle Side: Info */}
+                                <div className="flex-1 p-5 md:p-6 flex flex-col justify-center">
+                                    <h3 className="font-extrabold text-[#171C3C] text-xl mb-4 line-clamp-1 group-hover:text-[#98C4EC] transition-colors">
+                                        {evt.title}
+                                    </h3>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-[#D1CAF2]/20 flex items-center justify-center shrink-0 border border-[#D1CAF2]/40">
+                                                <Calendar className="w-4 h-4 text-[#171C3C]" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#171C3C]/40 mb-0.5">Date</p>
+                                                <p className="text-sm font-semibold text-[#171C3C]">
+                                                    {new Date(evt.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                                    {new Date(evt.startDate).getTime() !== new Date(evt.endDate).getTime() &&
+                                                        ` - ${new Date(evt.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-[#98C4EC]/20 flex items-center justify-center shrink-0 border border-[#98C4EC]/40">
+                                                <Clock className="w-4 h-4 text-[#171C3C]" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#171C3C]/40 mb-0.5">Time</p>
+                                                <p className="text-sm font-semibold text-[#171C3C]">
+                                                    {evt.startTime}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-3 sm:col-span-2">
+                                            <div className="w-10 h-10 rounded-xl bg-[#FE9E8F]/20 flex items-center justify-center shrink-0 border border-[#FE9E8F]/40">
+                                                <MapPin className="w-4 h-4 text-[#171C3C]" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest text-[#171C3C]/40 mb-0.5">Location</p>
+                                                <p className="text-sm font-semibold text-[#171C3C] line-clamp-1">
+                                                    {evt.location}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-[#171C3C]/70 line-clamp-2 text-xs mt-auto border-t border-[#171C3C]/5 pt-3">
                                         {evt.description}
                                     </p>
                                 </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex gap-3 mt-4 pt-4 border-t border-gray-100">
+                                {/* Dashed Separator Line & Cutouts for the Ticket Feel (visible on md+ only) */}
+                                <div className="hidden md:flex flex-col items-center justify-between relative px-0 bg-white z-10">
+                                    <div className="absolute top-[-16px] left-1/2 -translate-x-1/2 w-8 h-8 bg-[#FAFAFC] rounded-full shadow-inner border-b border-[#171C3C]/5 z-20"></div>
+                                    <div className="h-full border-r-2 border-dashed border-[#171C3C]/10 w-[2px]"></div>
+                                    <div className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-8 h-8 bg-[#FAFAFC] rounded-full shadow-inner border-t border-[#171C3C]/5 z-20"></div>
+                                </div>
+
+                                {/* Right Side: Action Phase */}
+                                <div className="w-full md:w-[22%] p-5 flex flex-col justify-center items-center bg-gradient-to-b from-white to-[#FAFAFC] text-center shrink-0 rounded-r-[1.5rem]">
+                                    <div className="mb-4">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-[#171C3C]/40 mb-1.5">Ticket Type</p>
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${evt.isFree
+                                            ? 'bg-green-100/50 text-green-700'
+                                            : 'bg-[#D1CAF2]/30 text-[#171C3C]'
+                                            }`}>
+                                            {evt.isFree ? 'Free' : 'Paid'}
+                                        </span>
+                                    </div>
+
+                                    <div className="mb-5">
+                                        <div className="text-3xl font-black text-[#171C3C]">
+                                            {evt.isFree ? 'Free' : `₹${evt.price}`}
+                                        </div>
+                                    </div>
+
                                     <button
-                                        onClick={() => {
-                                            if (!evt.isFree) {
-                                                toast.success('Please complete payment to book tickets. (Integration pending)');
-                                            } else {
-                                                toast.success('You have successfully registered for this event!');
-                                            }
-                                        }}
-                                        className="flex-1 py-3 px-4 bg-[#171C3C] text-white rounded-xl hover:bg-[#171C3C]/90 transition-colors font-medium flex items-center justify-center gap-2 text-sm"
+                                        onClick={() => openRegisterModal(evt)}
+                                        className="w-full py-3 px-4 bg-[#171C3C] text-white rounded-xl hover:bg-[#98C4EC] hover:text-[#171C3C] hover:-translate-y-0.5 transition-all duration-300 font-bold text-sm tracking-wide shadow-md shadow-[#171C3C]/10 group-hover:shadow-[#98C4EC]/30"
                                     >
-                                        {evt.isFree ? 'Register Now' : 'Book Tickets'}
+                                        {evt.isFree ? 'RSVP' : 'Book'}
                                     </button>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Premium Ticket Registration Modal */}
+            {isRegisterModalOpen && selectedEvent && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Darker Blur Backdrop */}
+                    <div className="absolute inset-0 bg-[#171C3C]/60 backdrop-blur-md transition-opacity" onClick={() => !isProcessing && setIsRegisterModalOpen(false)}></div>
+
+                    <div className="relative bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl transform transition-all shadow-[0_30px_60px_rgba(23,28,60,0.3)]">
+                        {/* Elegant Header */}
+                        <div className="bg-gradient-to-r from-[#171C3C] to-[#252a5c] p-10 text-white text-center relative overflow-hidden">
+                            <div className="absolute top-[-50px] right-[-50px] w-32 h-32 bg-[#98C4EC]/20 rounded-full blur-2xl"></div>
+                            <div className="absolute bottom-[-50px] left-[-50px] w-32 h-32 bg-[#FE9E8F]/20 rounded-full blur-2xl"></div>
+
+                            <h2 className="text-3xl font-black mb-2 relative z-10">{selectedEvent.isFree ? 'Your RSVP' : 'Book Tickets'}</h2>
+                            <p className="text-white/70 font-medium text-sm px-4 relative z-10">
+                                {selectedEvent.title}
+                            </p>
+                            <button
+                                onClick={() => setIsRegisterModalOpen(false)}
+                                disabled={isProcessing}
+                                className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white text-white hover:text-[#171C3C] transition-colors z-20 disabled:opacity-50"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+
+                            {/* Decorative Cutouts */}
+                            <div className="absolute bottom-[-15px] left-[-15px] w-8 h-8 rounded-full bg-white"></div>
+                            <div className="absolute bottom-[-15px] right-[-15px] w-8 h-8 rounded-full bg-white"></div>
                         </div>
-                    ))}
+
+                        <form onSubmit={handleRegistrationSubmit} className="p-8 space-y-6">
+                            <div className="relative group">
+                                <label className="block text-xs font-bold uppercase tracking-widest text-[#171C3C]/50 mb-2">Guest Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={registrationData.name}
+                                    onChange={handleRegistrationChange}
+                                    required
+                                    className="w-full px-5 py-3.5 bg-[#FAFAFC] border border-[#171C3C]/10 rounded-2xl focus:bg-white focus:border-[#98C4EC] focus:ring-4 focus:ring-[#98C4EC]/20 focus:outline-none transition-all font-semibold text-[#171C3C]"
+                                    placeholder="Enter your full name"
+                                />
+                            </div>
+
+                            <div className="relative group">
+                                <label className="block text-xs font-bold uppercase tracking-widest text-[#171C3C]/50 mb-2">Email Address</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={registrationData.email}
+                                    onChange={handleRegistrationChange}
+                                    required
+                                    className="w-full px-5 py-3.5 bg-[#FAFAFC] border border-[#171C3C]/10 rounded-2xl focus:bg-white focus:border-[#FE9E8F] focus:ring-4 focus:ring-[#FE9E8F]/20 focus:outline-none transition-all font-semibold text-[#171C3C]"
+                                    placeholder="your@email.com"
+                                />
+                            </div>
+
+                            <div className="relative group">
+                                <label className="block text-xs font-bold uppercase tracking-widest text-[#171C3C]/50 mb-2">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={registrationData.phone}
+                                    onChange={handleRegistrationChange}
+                                    required
+                                    className="w-full px-5 py-3.5 bg-[#FAFAFC] border border-[#171C3C]/10 rounded-2xl focus:bg-white focus:border-[#D1CAF2] focus:ring-4 focus:ring-[#D1CAF2]/30 focus:outline-none transition-all font-semibold text-[#171C3C]"
+                                    placeholder="+91 00000 00000"
+                                />
+                            </div>
+
+                            {!selectedEvent.isFree && (
+                                <div className="pt-2 border-t border-[#171C3C]/5">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="block text-xs font-bold uppercase tracking-widest text-[#171C3C]/50">Number of Tickets</label>
+                                        <div className="text-xl font-black text-[#171C3C]">
+                                            ₹{selectedEvent.price * registrationData.tickets}
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        name="tickets"
+                                        min="1"
+                                        max="10"
+                                        value={registrationData.tickets}
+                                        onChange={handleRegistrationChange}
+                                        required
+                                        className="w-full px-5 py-3.5 bg-[#FAFAFC] border border-[#171C3C]/10 rounded-2xl focus:bg-white focus:border-[#98C4EC] focus:ring-4 focus:ring-[#98C4EC]/20 focus:outline-none transition-all font-black text-[#171C3C] text-lg text-center"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="pt-6 border-t border-[#171C3C]/5">
+                                <button
+                                    type="submit"
+                                    disabled={isProcessing}
+                                    className="w-full py-4 bg-[#171C3C] text-white rounded-2xl hover:bg-[#171C3C]/90 hover:-translate-y-1 transition-all shadow-xl shadow-[#171C3C]/20 font-black text-lg tracking-wide disabled:opacity-70 disabled:hover:translate-y-0 disabled:cursor-not-allowed flex justify-center items-center gap-3 overflow-hidden relative group"
+                                >
+                                    {/* Shimmer effect */}
+                                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer"></div>
+
+                                    {isProcessing && <Loader2 className="w-6 h-6 animate-spin" />}
+                                    <span className="relative z-10">
+                                        {isProcessing ? 'Processing Request...' : (selectedEvent.isFree ? 'Confirm Registration' : 'Proceed to Checkout')}
+                                    </span>
+                                </button>
+                                <p className="text-center text-[10px] uppercase font-bold text-[#171C3C]/40 tracking-widest mt-4">Safe & Secure Process</p>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

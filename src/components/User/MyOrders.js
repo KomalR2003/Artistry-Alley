@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from 'react';
 import { Package, Truck, CheckCircle, Clock, X, User, Mail, Phone, MapPin } from 'lucide-react';
 
@@ -14,9 +14,9 @@ const MyOrders = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            // Get user info from localStorage
-            const userId = localStorage.getItem('userId');
-            const email = localStorage.getItem('userEmail');
+            // Get user info from sessionStorage
+            const userId = sessionStorage.getItem('userId');
+            const email = sessionStorage.getItem('userEmail');
 
             // If no credentials available, show empty state
             if (!userId && !email) {
@@ -40,7 +40,7 @@ const MyOrders = () => {
 
             if (data.success) {
                 setOrders(data.orders || []);
-                console.log('✅ Fetched orders:', data.orders.length);
+                console.log('âœ… Fetched orders:', data.orders.length);
             } else {
                 console.error(data.error || 'Failed to fetch orders');
                 setOrders([]);
@@ -75,7 +75,7 @@ const MyOrders = () => {
     const getItemStatusBadge = (status) => {
         const badges = {
             pending: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Awaiting Artist' },
-            confirmed: { bg: 'bg-green-100', text: 'text-green-700', label: '✓ Confirmed' },
+            confirmed: { bg: 'bg-green-100', text: 'text-green-700', label: 'âœ“ Confirmed' },
             cancelled: { bg: 'bg-red-100', text: 'text-red-700', label: 'Cancelled' }
         };
         const badge = badges[status] || badges.pending;

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
@@ -28,19 +28,19 @@ export default function Login() {
       });
 
       if (res.data?.success) {
-        // Store user info in localStorage
+        // Store user info in sessionStorage instead of sessionStorage to prevent cross-tab bleeding
         if (res.data.userId) {
-          localStorage.setItem('userId', res.data.userId);
+          sessionStorage.setItem('userId', res.data.userId);
         }
         if (res.data.role) {
-          localStorage.setItem('userRole', res.data.role);
+          sessionStorage.setItem('userRole', res.data.role);
         }
         if (res.data.username) {
-          localStorage.setItem('username', res.data.username);
+          sessionStorage.setItem('username', res.data.username);
         }
         // Store email for order retrieval
         if (form.email) {
-          localStorage.setItem('userEmail', form.email);
+          sessionStorage.setItem('userEmail', form.email);
         }
 
         toast.success("Login successful");
@@ -153,7 +153,7 @@ export default function Login() {
             <div className="col-span-2 relative rounded-2xl overflow-hidden bg-[#98C4EC] flex items-center justify-center p-6 hover:bg-opacity-90 transition-all">
               <div className="text-center w-full">
                 <div className="text-3xl font-bold text-slate-500 tracking-wider">
-                  EXPLORE <span className="text-slate-600">•</span> CONNECT <span className="text-slate-600">•</span> COLLECT
+                  EXPLORE <span className="text-slate-600">â€¢</span> CONNECT <span className="text-slate-600">â€¢</span> COLLECT
                 </div>
                 <div className="text-sm font-medium text-slate-600 mt-2">
                   The Art Gallery Experience
@@ -226,7 +226,7 @@ export default function Login() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••"
+                  placeholder="â€¢â€¢â€¢â€¢"
                   value={form.password}
                   onChange={(e) => update("password", e.target.value)}
                   required

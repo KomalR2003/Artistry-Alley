@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/db';
 import Event from '@/app/models/EventModel';
 import User from '@/app/models/userModel';

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+﻿import mongoose from 'mongoose';
 
 const OrderSchema = new mongoose.Schema({
     orderId: {
@@ -51,9 +51,12 @@ const OrderSchema = new mongoose.Schema({
         confirmationStatus: {
             type: String,
             enum: ['pending', 'confirmed', 'cancelled'],
-            default: 'pending'
+            default: 'confirmed'
         },
-        confirmedAt: Date
+        confirmedAt: {
+            type: Date,
+            default: Date.now
+        }
     }],
     totalAmount: {
         type: Number,
@@ -75,7 +78,7 @@ const OrderSchema = new mongoose.Schema({
     },
     allItemsConfirmed: {
         type: Boolean,
-        default: false
+        default: true
     }
 }, {
     timestamps: true

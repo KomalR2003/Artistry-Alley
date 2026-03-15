@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart, CreditCard, User, Mail, Phone, MapPin, ArrowRight, Shield } from 'lucide-react';
@@ -8,6 +8,17 @@ export default function Checkout({ onNavigate }) {
     const router = useRouter();
     const { cart, getCartTotal, clearCart } = useCart();
     const [isProcessing, setIsProcessing] = useState(false);
+
+    // Load Razorpay Script
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     // Customer form state
     const [customerDetails, setCustomerDetails] = useState({
@@ -56,13 +67,11 @@ export default function Checkout({ onNavigate }) {
 
     // Handle payment
     const handlePayment = async () => {
-        // Validate cart
         if (cart.length === 0) {
             toast.error('Your cart is empty');
             return;
         }
 
-        // Validate form
         if (!validateForm()) {
             return;
         }
@@ -70,26 +79,147 @@ export default function Checkout({ onNavigate }) {
         setIsProcessing(true);
 
         try {
-            // Placeholder: this is where your Razorpay flow will go once implemented from scratch
-            toast.success('Processing payment (Mock)...');
-
-            // Wait 1.5 seconds to simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Generate mock payment success for now
             const totalAmount = getCartTotal();
-            clearCart();
 
-            if (onNavigate) {
-                onNavigate('OrderSuccess', {
-                    orderId: `mock_order_${Date.now()}`,
-                    totalAmount: totalAmount
-                });
+            // 1. Create Order via backend API
+            const response = await fetch('/api/payment/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: totalAmount }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Failed to initialize payment');
             }
+
+            const rzpKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+
+            // MOCK FLOW IF KEYS ARE MISSING OR INVALID
+            if (data.isMock || !rzpKey || rzpKey === 'undefined' || rzpKey.includes('placeholder')) {
+                toast.success('Mock Payment Processing...');
+
+                await new Promise(r => setTimeout(r, 1500));
+
+                const verifyRes = await fetch('/api/payment/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        isMock: true,
+                        razorpay_order_id: data.order.id,
+                        razorpay_payment_id: `mock_pay_${Date.now()}`,
+                        razorpay_signature: 'mock_signature',
+                        customerDetails: {
+                            name: customerDetails.name,
+                            email: customerDetails.email,
+                            phone: customerDetails.phone,
+                            address: customerDetails.address,
+                            city: customerDetails.city,
+                            state: customerDetails.state,
+                            pincode: customerDetails.pincode
+                        },
+                        cartItems: cart,
+                        totalAmount: totalAmount
+                    })
+                });
+
+                const verifyData = await verifyRes.json();
+                if (verifyRes.ok && verifyData.success) {
+                    toast.success('Payment successful!', { id: 'payment-verify' });
+                    clearCart();
+                    if (onNavigate) {
+                        onNavigate('OrderSuccess', {
+                            orderId: verifyData.orderId,
+                            totalAmount: totalAmount
+                        });
+                    }
+                } else {
+                    throw new Error(verifyData.error || 'Payment verification failed');
+                }
+                setIsProcessing(false);
+                return;
+            }
+
+            // 2. Open Razorpay options
+            const options = {
+                key: rzpKey, // Enter the Key ID generated from the Dashboard
+                amount: data.order.amount,
+                currency: data.order.currency,
+                name: "Artistry Gallery",
+                description: "Purchase Artwork",
+                image: "/logo.png", // Path to logo
+                order_id: data.order.id, // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                handler: async function (response) {
+                    try {
+                        toast.loading('Verifying payment...', { id: 'payment-verify' });
+                        // 3. Verify Payment and Create Order
+                        const verifyRes = await fetch('/api/payment/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                customerDetails: {
+                                    name: customerDetails.name,
+                                    email: customerDetails.email,
+                                    phone: customerDetails.phone,
+                                    address: customerDetails.address,
+                                    city: customerDetails.city,
+                                    state: customerDetails.state,
+                                    pincode: customerDetails.pincode
+                                },
+                                cartItems: cart,
+                                totalAmount: totalAmount
+                            })
+                        });
+
+                        const verifyData = await verifyRes.json();
+
+                        if (verifyRes.ok && verifyData.success) {
+                            toast.success('Payment successful!', { id: 'payment-verify' });
+                            clearCart();
+                            if (onNavigate) {
+                                onNavigate('OrderSuccess', {
+                                    orderId: verifyData.orderId,
+                                    totalAmount: totalAmount
+                                });
+                            }
+                        } else {
+                            throw new Error(verifyData.error || 'Payment verification failed');
+                        }
+                    } catch (err) {
+                        toast.error(err.message || 'Error processing your order', { id: 'payment-verify' });
+                        setIsProcessing(false);
+                    }
+                },
+                prefill: {
+                    name: customerDetails.name,
+                    email: customerDetails.email,
+                    contact: customerDetails.phone
+                },
+                theme: {
+                    color: "#171C3C"
+                },
+                modal: {
+                    ondismiss: function () {
+                        setIsProcessing(false);
+                        toast.error('Payment cancelled');
+                    }
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                setIsProcessing(false);
+                toast.error(response.error.description || 'Payment Failed');
+            });
+            rzp.open();
+
         } catch (error) {
             console.error('Payment error:', error);
             toast.error(error.message || 'Payment failed. Please try again.');
-        } finally {
             setIsProcessing(false);
         }
     };

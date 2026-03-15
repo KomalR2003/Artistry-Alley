@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { FileText, TrendingUp, Users, MessageCircle } from 'lucide-react';
 
 export default function Blogs() {

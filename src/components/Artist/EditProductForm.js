@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';

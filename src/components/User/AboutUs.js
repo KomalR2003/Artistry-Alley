@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import Image from 'next/image';
 import abt1 from '../../../public/Images/abt1.png';
 import abt2 from '../../../public/Images/abt2.png';
@@ -143,7 +143,7 @@ export default function AboutUs({ onNavigate }) {
               </div>
               <h3 className="text-5xl font-bold mb-3 text-[#98C4EC]">200+</h3>
               <p className="font-semibold text-[#171C3C] mb-2 text-lg">Artworks Available</p>
-              <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Explore now →</p>
+              <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Explore now â†’</p>
             </div>
 
             {/* Exhibitions Held */}
@@ -156,7 +156,7 @@ export default function AboutUs({ onNavigate }) {
               </div>
               <h3 className="text-5xl font-bold mb-3 text-[#D1CAF2]">20</h3>
               <p className="font-semibold text-[#171C3C] mb-2 text-lg">Exhibitions Held</p>
-              <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Join Our Exhibitions →</p>
+              <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Join Our Exhibitions â†’</p>
             </div>
 
             {/* Happy Customers */}
@@ -168,7 +168,7 @@ export default function AboutUs({ onNavigate }) {
               </div>
               <h3 className="text-5xl font-bold mb-3 text-[#FE9E8F]">1000+</h3>
               <p className="font-semibold text-[#171C3C] mb-2 text-lg">Happy Customers</p>
-              <p className="text-sm text-gray-600 group-hover:text-[#171C3C] transition-colors font-medium">Join with Us →</p>
+              <p className="text-sm text-gray-600 group-hover:text-[#171C3C] transition-colors font-medium">Join with Us â†’</p>
             </div>
 
             {/* Talented Artists */}
@@ -180,7 +180,7 @@ export default function AboutUs({ onNavigate }) {
               </div>
               <h3 className="text-5xl font-bold mb-3 text-[#171C3C]">30</h3>
               <p className="font-semibold text-[#171C3C] mb-2 text-lg">Talented Artists</p>
-              <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Explore more →</p>
+              <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Explore more â†’</p>
             </div>
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function AboutUs({ onNavigate }) {
             {/* Left: Brand & Copyright */}
             <div className="text-center md:text-left">
               <h3 className="text-xl font-bold text-white mb-2">Artistry</h3>
-              <p className="text-gray-400 text-sm">© 2026 Artistry. All rights reserved.</p>
+              <p className="text-gray-400 text-sm">Â© 2026 Artistry. All rights reserved.</p>
             </div>
 
             {/* Center: Quick Links */}

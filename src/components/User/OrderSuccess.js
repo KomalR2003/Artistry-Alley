@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React from 'react';
 import { CheckCircle, Package, ShoppingCart, Home as HomeIcon, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -73,15 +73,15 @@ export default function OrderSuccess({ orderData }) {
                         </h3>
                         <ul className="space-y-2 text-sm text-[#171C3C]/70">
                             <li className="flex items-start gap-2">
-                                <span className="text-[#98C4EC] mt-1">•</span>
+                                <span className="text-[#98C4EC] mt-1">â€¢</span>
                                 <span>You'll receive an order confirmation email shortly</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <span className="text-[#98C4EC] mt-1">•</span>
+                                <span className="text-[#98C4EC] mt-1">â€¢</span>
                                 <span>We'll notify you when your order is ready for delivery</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <span className="text-[#98C4EC] mt-1">•</span>
+                                <span className="text-[#98C4EC] mt-1">â€¢</span>
                                 <span>Track your order status anytime from your account</span>
                             </li>
                         </ul>

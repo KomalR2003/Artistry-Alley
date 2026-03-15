@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Package, DollarSign, TrendingUp, Plus, Edit, Trash2, Loader2, Eye } from 'lucide-react';
 import AddProductForm from './AddProductForm';
@@ -24,10 +24,10 @@ const MyProducts = () => {
   });
 
   useEffect(() => {
-    // Get artist ID from localStorage (stored during login)
-    const userId = localStorage.getItem('userId');
-    const userRole = localStorage.getItem('userRole');
-    const username = localStorage.getItem('username');
+    // Get artist ID from sessionStorage (stored during login)
+    const userId = sessionStorage.getItem('userId');
+    const userRole = sessionStorage.getItem('userRole');
+    const username = sessionStorage.getItem('username');
 
     if (userId && userRole === 'artist') {
       setArtistId(userId);

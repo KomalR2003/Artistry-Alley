@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import dbConnect from "@/app/lib/db";
 import UserModel from "@/app/models/userModel";
 import { sendWelcomeEmail } from "@/app/lib/emailService";
@@ -53,6 +53,7 @@ export async function POST(req) {
       portfolio: body.portfolio,
       bio: body.bio,
       agree: body.agree,
+      profilePicture: body.profilePicture,
     });
 
     const safeUser = user.toObject();

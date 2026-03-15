@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import dbConnect from '../../../lib/db';
 import Order from '../../../models/OrderModel';
 import { sendOrderConfirmedByArtistEmail } from '../../../lib/emailService';
@@ -63,12 +63,12 @@ export async function POST(req) {
 
         await order.save();
 
-        console.log(`✅ Order item confirmed: ${order.orderId} - ${item.productname}`);
+        console.log(`âœ… Order item confirmed: ${order.orderId} - ${item.productname}`);
 
         // Send confirmation email to customer
         try {
             await sendOrderConfirmedByArtistEmail(order, item);
-            console.log('📧 Order confirmed email sent to customer');
+            console.log('ðŸ“§ Order confirmed email sent to customer');
         } catch (emailError) {
             console.error('Error sending confirmation email:', emailError);
             // Don't fail the confirmation if email fails

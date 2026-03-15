@@ -1,5 +1,6 @@
-"use client";
-import React, { useState } from "react";
+﻿"use client";
+import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 
@@ -10,8 +11,28 @@ import ManageProducts from "../../components/Admin/ManageProducts";
 import ManageTeam from "../../components/Admin/ManageTeam";
 
 export default function AdminPage() {
+    const router = useRouter();
+    const [activeView, setActiveView] = useState("AdminDashboard");
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
-    const [activeView, setActiveView] = useState("AdminDashboard"); 
+    useEffect(() => {
+        const role = sessionStorage.getItem('userRole');
+        if (!role) {
+            router.push('/login');
+        } else if (role !== 'admin') {
+            const redirectPath = role === 'artist' ? '/artist' : '/home';
+            router.push(redirectPath);
+        } else {
+            setIsAuthorized(true);
+        }
+    }, [router]);
+
+    if (!isAuthorized) {
+        return <div className="flex h-screen items-center justify-center bg-[#121212]">
+            <div className="animate-pulse text-white">Loading...</div>
+        </div>;
+    }
+
 
     const renderContent = () => {
         switch (activeView) {
@@ -25,7 +46,7 @@ export default function AdminPage() {
     };
     return (
         <div className="flex h-screen overflow-hidden bg-[#121212]">
-            <Sidebar role="admin" onNavigate={setActiveView}/>
+            <Sidebar role="admin" onNavigate={setActiveView} />
             <div className="flex-1 flex flex-col h-screen overflow-hidden">
                 <Header />
                 {renderContent()}

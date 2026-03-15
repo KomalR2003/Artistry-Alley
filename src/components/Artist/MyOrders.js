@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Package, CheckCircle, Clock, X } from 'lucide-react';
@@ -17,7 +17,7 @@ const MyOrders = () => {
         try {
             setLoading(true);
             // Get artist ID from session/auth
-            const artistId = localStorage.getItem('userId');
+            const artistId = sessionStorage.getItem('userId');
 
             if (!artistId) {
                 toast.error('Please log in as an artist');
@@ -48,7 +48,7 @@ const MyOrders = () => {
     };
 
     const confirmOrder = async (orderId, productId) => {
-        const artistId = localStorage.getItem('userId');
+        const artistId = sessionStorage.getItem('userId');
         const key = `${orderId}-${productId}`;
 
         try {

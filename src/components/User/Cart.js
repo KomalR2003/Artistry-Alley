@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React from 'react';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, X } from 'lucide-react';
@@ -203,7 +203,7 @@ export default function Cart({ onNavigate }) {
                             {/* Security Badge */}
                             <div className="mt-6 pt-6 border-t border-gray-300">
                                 <p className="text-xs text-[#171C3C]/60 text-center flex items-center justify-center gap-2">
-                                    <span className="text-green-600 text-lg">🔒</span>
+                                    <span className="text-green-600 text-lg">ðŸ”’</span>
                                     Secure Checkout
                                 </p>
                             </div>

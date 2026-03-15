@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+﻿import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema(
 
     mobile: {
       type: String,
+    },
+
+    profilePicture: {
+      type: String,
+      default: "",
     },
 
     dob: {

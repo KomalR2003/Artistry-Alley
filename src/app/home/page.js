@@ -1,5 +1,6 @@
-"use client";
-import React, { useState } from "react";
+﻿"use client";
+import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import Navbar from "../../components/Navbar";
 
 import Home from "../../components/User/Home";
@@ -19,8 +20,27 @@ import MyOrders from "../../components/User/MyOrders";
 
 
 export default function DashboardPage() {
+    const router = useRouter();
     const [activeView, setActiveView] = useState("Home");
     const [orderData, setOrderData] = useState(null);
+    const [isAuthorized, setIsAuthorized] = useState(false);
+
+    useEffect(() => {
+        const role = sessionStorage.getItem('userRole');
+        if (role === 'admin') {
+            router.push('/admin');
+        } else if (role === 'artist') {
+            router.push('/artist');
+        } else {
+            setIsAuthorized(true);
+        }
+    }, [router]);
+
+    if (!isAuthorized) {
+        return <div className="min-h-screen items-center justify-center bg-white flex">
+            <div className="animate-pulse text-[#171C3C]">Loading...</div>
+        </div>;
+    }
 
     const handleNavigate = (page, data) => {
         const pageMap = {
