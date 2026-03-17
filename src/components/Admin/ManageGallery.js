@@ -1,11 +1,13 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Image, Images, Heart, Trash2, Search, AlertTriangle, User, Folder, Edit2 } from 'lucide-react';
+import { Image, Images, Heart, Trash2, Search, AlertTriangle, User, Folder, Edit2, Eye, MessageSquare, X } from 'lucide-react';
 const ManageGallery = () => {
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [itemToDelete, setItemToDelete] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewedItem, setViewedItem] = useState(null);
 
   useEffect(() => {
     fetchGallery();
@@ -28,7 +30,7 @@ const ManageGallery = () => {
 
   // Derived Statistics
   const totalArtworks = artworks.length;
-  const totalLikes = artworks.reduce((acc, curr) => acc + (curr.likes || 0), 0);
+  const totalLikes = artworks.reduce((acc, curr) => acc + (curr.likes?.length || 0), 0);
   const uniqueAlbums = new Set(artworks.map(a => a.category).filter(Boolean)).size;
 
   // Filtered Artworks
@@ -177,7 +179,10 @@ const ManageGallery = () => {
                 filteredArtworks.map((item, idx) => (
                   <tr key={idx} className="border-b border-[#D1CAF2]/10 hover:bg-[#FAFAFA]/40 transition-colors group">
                     <td className="p-5 w-32">
-                      <div className="w-24 h-24 rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center shadow-sm border border-slate-200">
+                      <div
+                        className="w-24 h-24 rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-400 transition-colors"
+                        onClick={() => { setViewedItem(item); setIsViewModalOpen(true); }}
+                      >
                         {item.imageUrl ? (
                           <img src={item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:3000${item.imageUrl}`} alt="Artwork" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         ) : (
@@ -211,7 +216,7 @@ const ManageGallery = () => {
                     <td className="p-5">
                       <div className="flex gap-4 items-center">
                         <span className="flex items-center gap-1.5 text-sm font-bold text-rose-500 bg-rose-50 px-3 py-1 rounded-lg">
-                          <Heart className="w-4 h-4 fill-rose-500" /> {item.likes || 0}
+                          <Heart className="w-4 h-4 fill-rose-500" /> {item.likes?.length || 0}
                         </span>
                         <span className="text-xs font-semibold text-black uppercase tracking-wider">
                           Likes
@@ -322,6 +327,99 @@ const ManageGallery = () => {
               >
                 Save Edits
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Engagement Modal */}
+      {isViewModalOpen && viewedItem && (
+        <div className="fixed inset-0 z-[70] bg-[#171C3C]/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+          <div className="bg-[#FAFAFA] rounded-3xl w-full max-w-5xl max-h-[90vh] shadow-2xl animate-fade-in relative flex flex-col md:flex-row overflow-hidden border border-[#D1CAF2]/30">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsViewModalOpen(false)}
+              className="absolute right-4 top-4 z-10 text-[#171C3C]/60 hover:text-[#FE9E8F] transition-colors p-2 bg-white/80 backdrop-blur-md rounded-full hover:bg-white shadow-sm"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Left Image Section */}
+            <div className="w-full md:w-1/2 bg-[#171C3C] flex items-center justify-center relative p-8">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#171C3C] to-[#1a1f40] pointer-events-none"></div>
+              <img
+                src={viewedItem.imageUrl}
+                alt={viewedItem.title}
+                className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl relative z-10 border border-white/10"
+              />
+            </div>
+
+            {/* Right Details Section */}
+            <div className="w-full md:w-1/2 flex flex-col h-[50vh] md:h-auto overflow-y-auto custom-scrollbar bg-white">
+              <div className="p-8">
+                <div className="mb-6">
+                  <h2 className="text-3xl font-black text-[#171C3C] mb-2 tracking-tight">
+                    {viewedItem.title} <span className="text-sm font-medium text-black/50 ml-2">by {viewedItem.artistId?.username || viewedItem.artistId?.name || 'Unknown'}</span>
+                  </h2>
+                  <div className="flex items-center gap-4 text-sm text-[#171C3C]/60 font-medium">
+                    <span className="bg-[#98C4EC]/20 text-[#98C4EC] px-3 py-1 rounded-full">{viewedItem.category}</span>
+                    <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {viewedItem.views} Views</span>
+                  </div>
+                </div>
+
+                {viewedItem.description && (
+                  <p className="text-[#171C3C]/70 mb-8 leading-relaxed text-sm">
+                    {viewedItem.description}
+                  </p>
+                )}
+
+                {/* Engagement Panels */}
+                <div className="flex gap-6 border-t border-[#D1CAF2]/40 pt-6">
+
+                  {/* Comments Panel */}
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-[#98C4EC]" />
+                      Comments ({viewedItem.comments?.filter(c => c.status === 'approved').length || 0})
+                    </h3>
+                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                      {!viewedItem.comments || viewedItem.comments.filter(c => c.status === 'approved').length === 0 ? (
+                        <p className="text-sm text-[#171C3C]/40 italic">No comments yet</p>
+                      ) : (
+                        viewedItem.comments.filter(c => c.status === 'approved').map((comment, index) => (
+                          <div key={index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30">
+                            <h4 className="font-bold text-[#171C3C] text-xs mb-1">{comment.userName || 'Anonymous'}</h4>
+                            <p className="text-sm text-[#171C3C]/70">{comment.text}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Likes Panel */}
+                  <div className="flex-1 border-l border-[#D1CAF2]/40 pl-6">
+                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                      <Heart className="w-4 h-4 fill-[#FE9E8F] text-[#FE9E8F]" />
+                      Likes ({viewedItem.likes?.length || 0})
+                    </h3>
+                    <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                      {!viewedItem.likes || viewedItem.likes.length === 0 ? (
+                        <p className="text-sm text-[#171C3C]/40 italic">No likes yet</p>
+                      ) : (
+                        viewedItem.likes.map((like, index) => (
+                          <div key={index} className="flex items-center gap-2 text-sm text-[#171C3C]/70 font-medium p-2 bg-[#FE9E8F]/5 rounded-lg">
+                            <div className="w-6 h-6 rounded-full bg-[#FE9E8F]/20 flex items-center justify-center text-[#FE9E8F] text-xs font-bold shrink-0">
+                              {(like.userName && like.userName.length > 0) ? like.userName.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <span className="truncate">{like.userName || 'A user'}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
         </div>

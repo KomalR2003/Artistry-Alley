@@ -1,10 +1,9 @@
 ﻿import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/db';
-import ProductModel from '@/app/models/ProductModel';
-import EventModel from '@/app/models/EventModel';
-import GalleryModel from '@/app/models/GalleryModel';
 import OrderModel from '@/app/models/OrderModel';
 import EventRegistrationModel from '@/app/models/EventRegistrationModel';
+import GalleryModel from '@/app/models/GalleryModel';
+import UserModel from '@/app/models/UserModel';
 
 export async function GET(request) {
     try {
@@ -18,59 +17,9 @@ export async function GET(request) {
 
         const activities = [];
 
-        // Calculate 7 days ago timestamp
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        // 1. Products
-        const products = await ProductModel.find({ artistId, createdAt: { $gte: sevenDaysAgo } }).sort({ createdAt: -1 }).limit(10);
-        products.forEach(p => {
-            activities.push({
-                _id: p._id.toString(),
-                type: 'product',
-                user: 'You',
-                action: 'added product',
-                item: p.productname,
-                createdAt: p.createdAt,
-                avatar: 'Y'
-            });
-        });
-
-        // 2. Events
-        const events = await EventModel.find({ artistId, createdAt: { $gte: sevenDaysAgo } }).sort({ createdAt: -1 }).limit(10);
-        const eventIds = events.map(e => e._id);
-        events.forEach(e => {
-            activities.push({
-                _id: e._id.toString(),
-                type: 'event',
-                user: 'You',
-                action: 'created event',
-                item: e.title,
-                createdAt: e.createdAt,
-                avatar: 'Y'
-            });
-        });
-
-        // 3. Gallery
-        const gallery = await GalleryModel.find({ artistId, createdAt: { $gte: sevenDaysAgo } }).sort({ createdAt: -1 }).limit(10);
-        gallery.forEach(g => {
-            activities.push({
-                _id: g._id.toString(),
-                type: 'gallery',
-                user: 'You',
-                action: 'published',
-                item: g.title,
-                createdAt: g.createdAt,
-                avatar: 'Y'
-            });
-        });
-
-        // 4. Orders (Products sold by artist)
-        // OrderModel usually has a 'customer.name' or 'userId' we would ideally populate, 
-        // but checking schema it seems usually there's a user associated. Let's try to pull customer name.
-        const orders = await OrderModel.find({ "items.artistId": artistId, createdAt: { $gte: sevenDaysAgo } }).sort({ createdAt: -1 }).limit(10);
+        // 1. Orders (Purchases of Artist's Products)
+        const orders = await OrderModel.find({ "items.artistId": artistId }).sort({ createdAt: -1 }).limit(20);
         orders.forEach(o => {
-            // Find the item(s) belonging to this artist
             const artistItems = o.items.filter(item => item.artistId && item.artistId.toString() === artistId);
             const buyerName = o.customer?.name || 'A user';
             const buyerInitial = buyerName !== 'A user' ? buyerName.charAt(0).toUpperCase() : 'U';
@@ -88,12 +37,19 @@ export async function GET(request) {
             });
         });
 
-        // 5. Event Registrations (Bookings for artist events)
+        // 2. Event Registrations (Bookings for Artist's Events)
+        // We need the artist's event IDs first
+        const mongoose = require('mongoose');
+        const EventModel = mongoose.models.Event || mongoose.model("Event");
+        const artistEvents = await EventModel.find({ artistId }).select('_id title');
+        const eventIds = artistEvents.map(e => e._id);
+        const eventMap = {};
+        artistEvents.forEach(e => eventMap[e._id.toString()] = e.title);
+
         if (eventIds.length > 0) {
-            const registrations = await EventRegistrationModel.find({ eventId: { $in: eventIds }, createdAt: { $gte: sevenDaysAgo } })
+            const registrations = await EventRegistrationModel.find({ eventId: { $in: eventIds } })
                 .sort({ createdAt: -1 })
-                .limit(10)
-                .populate('eventId');
+                .limit(20);
 
             registrations.forEach(r => {
                 const registrantName = r.name || 'A user';
@@ -104,15 +60,76 @@ export async function GET(request) {
                     type: 'registration',
                     user: registrantName,
                     action: 'booked',
-                    item: r.eventId?.title || 'an event',
+                    item: eventMap[r.eventId.toString()] || 'an event',
                     createdAt: r.createdAt,
                     avatar: registrantInitial
                 });
             });
         }
 
-        // Sort all descending by createdAt and take top 10
+        // 3. Gallery Likes and Comments
+        const galleries = await GalleryModel.find({ artistId });
+        galleries.forEach(g => {
+            // Push Likes
+            if (g.likes && g.likes.length > 0) {
+                g.likes.forEach(like => {
+                    const likerName = like.userName || 'A user';
+                    const likerInitial = likerName !== 'A user' ? likerName.charAt(0).toUpperCase() : 'U';
+
+                    activities.push({
+                        _id: `like-${g._id.toString()}-${(like && like.user ? like.user.toString() : (like ? like.toString() : Math.random()))}`,
+                        type: 'like',
+                        user: likerName,
+                        action: 'liked',
+                        item: g.title,
+                        createdAt: like.createdAt || g.createdAt, // fallback to gallery creation if ancient
+                        avatar: likerInitial
+                    });
+                });
+            }
+
+            // Push Comments
+            if (g.comments && g.comments.length > 0) {
+                g.comments.forEach(comment => {
+                    if (comment.status === 'approved') {
+                        const commenterName = comment.userName || 'A user';
+                        const commenterInitial = commenterName !== 'A user' ? commenterName.charAt(0).toUpperCase() : 'U';
+
+                        activities.push({
+                            _id: `comment-${comment._id?.toString() || Math.random()}`,
+                            type: 'comment',
+                            user: commenterName,
+                            action: 'commented on',
+                            item: g.title,
+                            createdAt: comment.createdAt || g.createdAt,
+                            avatar: commenterInitial
+                        });
+                    }
+                });
+            }
+        });
+
+        // Sort everything descending by createdAt
         activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        // Attempt to fetch real Profile Pictures for the involved users
+        const uniqueUsernames = [...new Set(activities.map(a => a.user))].filter(n => n !== 'A user');
+        const userDocs = await UserModel.find({ username: { $in: uniqueUsernames } }).select('username profilePicture');
+
+        const userImageMap = {};
+        userDocs.forEach(u => {
+            if (u.profilePicture) userImageMap[u.username] = u.profilePicture;
+        });
+
+        // Attach the real image URL if it exists
+        activities.forEach(activity => {
+            if (userImageMap[activity.user]) {
+                activity.avatarImage = userImageMap[activity.user];
+            }
+        });
+
+        // Take top 10 recent activities. If there are none from the past 2-3 days, 
+        // this inherently grabs the most recent older ones to fill the vertical space.
         const recentActivities = activities.slice(0, 10);
 
         return NextResponse.json({ success: true, activities: recentActivities });

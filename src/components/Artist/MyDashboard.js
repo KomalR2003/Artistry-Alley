@@ -210,7 +210,7 @@ export default function Dashboard() {
                         if (galleryAllData.success) {
                             const allImages = galleryAllData.images || [];
                             totalGalleryImages = allImages.length;
-                            galleryLikes = allImages.reduce((sum, img) => sum + (img.likes || 0), 0);
+                            galleryLikes = allImages.reduce((sum, img) => sum + (img.likes?.length || 0), 0);
                             galleryAlbums = [...new Set(allImages.map(img => img.category))].length;
                             galleryComments = allImages.reduce((sum, img) => sum + (img.comments?.length || 0), 0);
                         }
@@ -285,7 +285,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Chart Section (Visual Mockup) */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-2 flex flex-col space-y-8">
                     {/* Gallery Overview */}
                     <div className="bg-[#D1CAF2]/10 p-6 rounded-2xl border border-[#D1CAF2]/40">
                         <div className="flex justify-between items-center mb-6">
@@ -298,7 +298,7 @@ export default function Dashboard() {
                                 <p className="text-sm text-gray-500 col-span-3 text-center py-4">Loading...</p>
                             ) : recentGallery.length === 0 ? (
                                 <p className="text-sm text-gray-500 col-span-3 text-center py-4">No gallery uploads yet.</p>
-                            ) : recentGallery.map((art, idx) => (
+                            ) : recentGallery.slice(0, 3).map((art, idx) => (
                                 <div key={idx} className="p-3 rounded-xl bg-white border border-[#D1CAF2]/40 hover:border-[#98C4EC] transition-all cursor-pointer group shadow-sm hover:shadow-md">
                                     <div
                                         className={`h-32 mb-3 rounded-lg ${art.color} relative overflow-hidden bg-cover bg-center`}
@@ -326,7 +326,7 @@ export default function Dashboard() {
                             {!recentProductsList || recentProductsList.length === 0 ? (
                                 <p className="text-sm text-gray-500 text-center py-4">No products added yet.</p>
                             ) : (
-                                recentProductsList.map((prod, idx) => (
+                                recentProductsList.slice(0, 2).map((prod, idx) => (
                                     <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#98C4EC]/40 shadow-sm">
                                         <div className="flex items-center gap-4">
                                             {prod.imageUrl ? (
@@ -350,18 +350,22 @@ export default function Dashboard() {
                     </div>
                 </div>
                 {/* Right Side Panel */}
-                <div className="space-y-8">
+                <div className="w-full">
                     {/* Recent Activity */}
-                    <div className="bg-[#FE9E8F]/10 p-6 rounded-2xl border border-[#FE9E8F]/40 h-full">
+                    <div className="bg-[#FE9E8F]/10 p-6 rounded-2xl border border-[#FE9E8F]/40 h-full flex flex-col">
                         <h2 className="text-xl font-bold text-[#171C3C] mb-6">Recent Activity</h2>
-                        <div className="space-y-6">
+                        <div className="space-y-6 pb-4">
                             {!recentActivityList || recentActivityList.length === 0 ? (
                                 <p className="text-sm text-gray-500 text-center py-4">No recent activity.</p>
                             ) : (
-                                recentActivityList.map((activity, index) => (
+                                recentActivityList.slice(0, 7).map((activity, index) => (
                                     <div key={index} className="flex gap-4 items-start">
-                                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#D1CAF2] to-[#98C4EC] flex items-center justify-center text-sm font-bold border-2 border-white shadow-sm text-[#171C3C]">
-                                            {activity.avatar}
+                                        <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-[#D1CAF2] to-[#98C4EC] flex items-center justify-center text-sm font-bold border-2 border-white shadow-sm text-[#171C3C] overflow-hidden">
+                                            {activity.avatarImage ? (
+                                                <img src={activity.avatarImage} alt={activity.user} className="w-full h-full object-cover rounded-full" />
+                                            ) : (
+                                                <span>{activity.avatar}</span>
+                                            )}
                                         </div>
                                         <div>
                                             <p className="text-sm text-[#171C3C]">
@@ -383,8 +387,6 @@ export default function Dashboard() {
                             View All Activity
                         </button> */}
                     </div>
-
-
                 </div>
             </div>
         </div>

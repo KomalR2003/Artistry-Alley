@@ -63,7 +63,7 @@ const MyPortfolio = () => {
 
       let totalViews = 0;
       if (galleryData.success && galleryData.images) {
-        totalViews = galleryData.images.reduce((sum, img) => sum + (img.likes || 0), 0) * 5; // Simulating views from likes
+        totalViews = galleryData.images.reduce((sum, img) => sum + (img.views || 0), 0);
       }
 
       setStats({

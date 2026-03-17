@@ -21,8 +21,20 @@ export default function Gallery() {
         featured: 0
     });
 
+    // Auth and Engagement State
+    const [currentUser, setCurrentUser] = useState(null);
+    const [newComment, setNewComment] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
     useEffect(() => {
         fetchImages();
+
+        // Get user from session
+        const userId = sessionStorage.getItem('userId');
+        const userName = sessionStorage.getItem('userName') || sessionStorage.getItem('username');
+        if (userId) {
+            setCurrentUser({ id: userId, name: userName || 'Anonymous' });
+        }
     }, []);
 
     useEffect(() => {
@@ -96,15 +108,125 @@ export default function Gallery() {
         setFilteredImages(filtered);
     };
 
-    const handleViewImage = (image) => {
+    const handleViewImage = async (image) => {
         setSelectedImage(image);
         setIsViewModalOpen(true);
+
+        // Client-side session throttle (vital for locking anonymous users from spamming the count)
+        const sessionKey = `viewed_${image._id}`;
+        if (sessionStorage.getItem(sessionKey)) return;
+
+        try {
+            // Increment view count in database (unique to user)
+            const payload = currentUser ? { userId: currentUser.id } : {};
+            const res = await fetch(`/api/gallery/${image._id}/view`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                // Update local state so it immediately reflects
+                sessionStorage.setItem(sessionKey, 'true');
+                const updatedImage = { ...image, views: data.views };
+                setSelectedImage(updatedImage);
+                setImages(images.map(img => img._id === image._id ? updatedImage : img));
+            }
+        } catch (err) {
+            console.error('Error incrementing view:', err);
+        }
     };
 
     const clearFilters = () => {
         setSearchQuery('');
         setSelectedCategory('all');
         setSelectedArtist('all');
+    };
+
+    const handleLike = async (e, targetImage = selectedImage) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        if (!currentUser) return alert("Please log in to like artworks");
+        if (!targetImage) return;
+
+        try {
+            const res = await fetch(`/api/gallery/${targetImage._id}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.id, userName: currentUser.name })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                // Determine the new likes array based on whether the backend says we just liked or unliked it
+                let newLikes;
+                if (data.hasLiked) {
+                    // We just liked it, so add our ID
+                    newLikes = [...(targetImage.likes || []), { user: currentUser.id, userName: currentUser.name }];
+                } else {
+                    // We just unliked it, so remove our ID using safe parsing for Mixed types
+                    newLikes = (targetImage.likes || []).filter(like => {
+                        const likeUserId = (like && like.user) ? like.user.toString() : (like ? like.toString() : null);
+                        return likeUserId !== currentUser.id.toString();
+                    });
+                }
+
+                const updatedImage = { ...targetImage, likes: newLikes };
+
+                // If the modal is currently open for THIS image, update it
+                if (selectedImage && selectedImage._id === updatedImage._id) {
+                    setSelectedImage(updatedImage);
+                }
+
+                // Update the main grid array
+                setImages(images.map(img => img._id === updatedImage._id ? updatedImage : img));
+            }
+        } catch (err) {
+            console.error('Error toggling like:', err);
+        }
+    };
+
+    const handleComment = async (e) => {
+        e.preventDefault();
+        if (!currentUser) return alert("Please log in to comment");
+        if (!newComment.trim() || !selectedImage) return;
+
+        setSubmitting(true);
+        try {
+            const res = await fetch(`/api/gallery/${selectedImage._id}/comment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    userName: currentUser.name,
+                    text: newComment
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                if (data.status === 'approved' && data.comment) {
+                    const updatedImage = {
+                        ...selectedImage,
+                        comments: [...(selectedImage.comments || []), data.comment]
+                    };
+                    setSelectedImage(updatedImage);
+                    setImages(images.map(img => img._id === updatedImage._id ? updatedImage : img));
+                } else {
+                    alert('Your comment was flagged by moderation and is hidden.');
+                }
+                setNewComment('');
+            } else {
+                alert(data.message || 'Failed to post comment');
+            }
+        } catch (err) {
+            console.error('Error posting comment:', err);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -294,9 +416,17 @@ export default function Gallery() {
 
                                 {/* Stats */}
                                 <div className="flex items-center gap-4 mb-4 text-sm text-[#171C3C]/60">
-                                    <div className="flex items-center gap-1">
-                                        <Heart className="w-4 h-4" />
-                                        <span>{image.likes || 0}</span>
+                                    <div
+                                        className="flex items-center gap-1 cursor-pointer hover:bg-[#FE9E8F]/10 p-1.5 -ml-1.5 rounded-lg transition-colors group"
+                                        onClick={(e) => handleLike(e, image)}
+                                        title={image.likes?.some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === currentUser?.id?.toString()) ? "Unlike" : "Like"}
+                                    >
+                                        <Heart
+                                            className={`w-4 h-4 transition-transform group-hover:scale-110 ${image.likes?.some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === currentUser?.id?.toString()) ? 'fill-[#FE9E8F] text-[#FE9E8F]' : 'group-hover:text-[#FE9E8F]'}`}
+                                        />
+                                        <span className={`group-hover:text-[#FE9E8F] transition-colors ${image.likes?.some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === currentUser?.id?.toString()) ? 'text-[#FE9E8F]' : ''}`}>
+                                            {image.likes?.length || 0}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Eye className="w-4 h-4" />
@@ -395,7 +525,7 @@ export default function Gallery() {
                                         <div className="flex gap-4">
                                             <div className="flex items-center gap-1">
                                                 <Heart className="w-5 h-5 text-[#FE9E8F]" />
-                                                <span className="text-[#171C3C] font-medium">{selectedImage.likes || 0} likes</span>
+                                                <span className="text-[#171C3C] font-medium">{selectedImage.likes?.length || 0} likes</span>
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <Eye className="w-5 h-5 text-[#98C4EC]" />
@@ -433,13 +563,65 @@ export default function Gallery() {
 
                             {/* Action Button */}
                             <div className="flex gap-4">
-                                <button className="flex-1 py-3 bg-[#FE9E8F] text-white rounded-xl hover:bg-[#FE9E8F]/90 transition-colors font-medium flex items-center justify-center gap-2">
-                                    <Heart className="w-5 h-5" />
-                                    Like Artwork
+                                <button
+                                    onClick={handleLike}
+                                    className="flex-1 py-3 bg-white border-2 border-[#FE9E8F] text-[#FE9E8F] rounded-xl hover:bg-[#FE9E8F]/10 transition-colors font-medium flex items-center justify-center gap-2"
+                                >
+                                    <Heart
+                                        className={`w-5 h-5 transition-all ${selectedImage.likes?.some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === currentUser?.id?.toString()) ? 'fill-current scale-110' : ''}`}
+                                    />
+                                    {selectedImage.likes?.some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === currentUser?.id?.toString()) ? 'Liked' : 'Like Artwork'}
                                 </button>
                                 <button className="px-6 py-3 border border-[#171C3C] text-[#171C3C] rounded-xl hover:bg-[#171C3C]/5 transition-colors font-medium">
                                     Contact Artist
                                 </button>
+                            </div>
+
+                            {/* Comments Section */}
+                            <div className="mt-10 border-t border-gray-100 pt-8">
+                                <h3 className="text-xl font-bold text-[#171C3C] mb-6">Comments</h3>
+
+                                {/* Comments List */}
+                                <div className="space-y-4 mb-8 max-h-60 overflow-y-auto pr-2">
+                                    {selectedImage.comments?.filter(c => c.status === 'approved').length > 0 ? (
+                                        selectedImage.comments.filter(c => c.status === 'approved').map((comment, idx) => (
+                                            <div key={idx} className="bg-gray-50 p-4 rounded-xl">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="font-semibold text-[#171C3C] text-sm">{comment.userName}</span>
+                                                    <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                                <p className="text-[#171C3C]/80 text-sm whitespace-pre-wrap">{comment.text}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-400 text-sm text-center py-4 italic">No comments yet. Be the first to comment!</p>
+                                    )}
+                                </div>
+
+                                {/* Comment Form */}
+                                {currentUser ? (
+                                    <form onSubmit={handleComment} className="flex gap-3">
+                                        <input
+                                            type="text"
+                                            value={newComment}
+                                            onChange={(e) => setNewComment(e.target.value)}
+                                            placeholder="Write a completely appropriate comment..."
+                                            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#98C4EC] focus:ring-2 focus:ring-[#98C4EC]/20 transition-all text-sm"
+                                            disabled={submitting}
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={!newComment.trim() || submitting}
+                                            className="px-6 py-3 bg-[#171C3C] text-white rounded-xl hover:bg-[#171C3C]/90 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {submitting ? 'Posting...' : 'Post'}
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <div className="bg-orange-50 text-orange-600 p-4 rounded-xl text-sm text-center">
+                                        Please log in to leave a comment or like this artwork.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

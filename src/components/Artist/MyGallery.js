@@ -1,6 +1,6 @@
 ﻿'use client';
 import React, { useState, useEffect } from 'react';
-import { Images, Image, Heart, Eye, Plus, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Images, Image, Heart, Eye, Plus, Edit, Trash2, Loader2, MessageSquare, X } from 'lucide-react';
 import AddGalleryImageForm from './AddGalleryImageForm';
 import EditGalleryImageForm from './EditGalleryImageForm';
 
@@ -11,13 +11,16 @@ const MyGallery = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedImageId, setSelectedImageId] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewedImage, setViewedImage] = useState(null);
   const [artistId, setArtistId] = useState(null);
   const [artistName, setArtistName] = useState('');
   const [stats, setStats] = useState({
     total: 0,
     categories: 0,
     totalLikes: 0,
-    totalViews: 0
+    totalViews: 0,
+    totalComments: 0
   });
 
   useEffect(() => {
@@ -58,14 +61,19 @@ const MyGallery = () => {
         // Calculate stats
         const total = data.images.length;
         const uniqueCategories = [...new Set(data.images.map(img => img.category))].length;
-        const totalLikes = data.images.reduce((sum, img) => sum + (img.likes || 0), 0);
+        const totalLikes = data.images.reduce((sum, img) => sum + (img.likes?.length || 0), 0);
         const totalViews = data.images.reduce((sum, img) => sum + (img.views || 0), 0);
+        const totalComments = data.images.reduce((sum, img) => {
+          const approvedComments = img.comments?.filter(c => c.status === 'approved') || [];
+          return sum + approvedComments.length;
+        }, 0);
 
         setStats({
           total,
           categories: uniqueCategories,
           totalLikes,
-          totalViews
+          totalViews,
+          totalComments
         });
       } else {
         setError(data.message || 'Failed to fetch gallery images');
@@ -189,6 +197,10 @@ const MyGallery = () => {
                 <span className="text-sm text-[#171C3C]/60 font-medium whitespace-nowrap mb-1">Total Views</span>
                 <span className="text-2xl font-semibold text-[#171C3C] tracking-tight">{stats.totalViews}</span>
               </div>
+              <div className="flex flex-col justify-center">
+                <span className="text-sm text-[#171C3C]/60 font-medium whitespace-nowrap mb-1">Comments</span>
+                <span className="text-2xl font-semibold text-[#171C3C] tracking-tight">{stats.totalComments}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -224,7 +236,10 @@ const MyGallery = () => {
               className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all group"
             >
               {/* Image */}
-              <div className="relative h-48 bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20 overflow-hidden">
+              <div
+                className="relative h-48 bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20 overflow-hidden cursor-pointer group-hover:opacity-90 transition-opacity"
+                onClick={() => { setViewedImage(image); setIsViewModalOpen(true); }}
+              >
                 <img
                   src={image.imageUrl}
                   alt={image.title}
@@ -265,7 +280,11 @@ const MyGallery = () => {
                 <div className="flex items-center gap-4 mb-4 text-sm text-[#171C3C]/60">
                   <div className="flex items-center gap-1">
                     <Heart className="w-4 h-4" />
-                    <span>{image.likes || 0}</span>
+                    <span>{image.likes?.length || 0}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>{image.comments?.filter(c => c.status === 'approved').length || 0}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Eye className="w-4 h-4" />
@@ -326,6 +345,99 @@ const MyGallery = () => {
         onImageUpdated={handleImageUpdated}
         imageId={selectedImageId}
       />
+
+      {/* View Engagement Modal */}
+      {isViewModalOpen && viewedImage && (
+        <div className="fixed inset-0 z-50 bg-[#171C3C]/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+          <div className="bg-[#FAFAFA] rounded-3xl w-full max-w-5xl max-h-[90vh] shadow-2xl animate-fade-in relative flex flex-col md:flex-row overflow-hidden border border-[#D1CAF2]/30">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsViewModalOpen(false)}
+              className="absolute right-4 top-4 z-10 text-[#171C3C]/60 hover:text-[#FE9E8F] transition-colors p-2 bg-white/80 backdrop-blur-md rounded-full hover:bg-white shadow-sm"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Left Image Section */}
+            <div className="w-full md:w-1/2 bg-[#171C3C] flex items-center justify-center relative p-8">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#171C3C] to-[#1a1f40] pointer-events-none"></div>
+              <img
+                src={viewedImage.imageUrl}
+                alt={viewedImage.title}
+                className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl relative z-10 border border-white/10"
+              />
+            </div>
+
+            {/* Right Details Section */}
+            <div className="w-full md:w-1/2 flex flex-col h-[50vh] md:h-auto overflow-y-auto custom-scrollbar bg-white">
+              <div className="p-8">
+                <div className="mb-6">
+                  <h2 className="text-3xl font-black text-[#171C3C] mb-2 tracking-tight">
+                    {viewedImage.title}
+                  </h2>
+                  <div className="flex items-center gap-4 text-sm text-[#171C3C]/60 font-medium">
+                    <span className="bg-[#98C4EC]/20 text-[#98C4EC] px-3 py-1 rounded-full">{viewedImage.category}</span>
+                    <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {viewedImage.views} Views</span>
+                  </div>
+                </div>
+
+                {viewedImage.description && (
+                  <p className="text-[#171C3C]/70 mb-8 leading-relaxed text-sm">
+                    {viewedImage.description}
+                  </p>
+                )}
+
+                {/* Engagement Panels */}
+                <div className="flex gap-6 border-t border-[#D1CAF2]/40 pt-6">
+
+                  {/* Comments Panel */}
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-[#98C4EC]" />
+                      Comments ({viewedImage.comments?.filter(c => c.status === 'approved').length || 0})
+                    </h3>
+                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                      {!viewedImage.comments || viewedImage.comments.filter(c => c.status === 'approved').length === 0 ? (
+                        <p className="text-sm text-[#171C3C]/40 italic">No comments yet</p>
+                      ) : (
+                        viewedImage.comments.filter(c => c.status === 'approved').map((comment, index) => (
+                          <div key={index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30">
+                            <h4 className="font-bold text-[#171C3C] text-xs mb-1">{comment.userName || 'Anonymous'}</h4>
+                            <p className="text-sm text-[#171C3C]/70">{comment.text}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Likes Panel */}
+                  <div className="flex-1 border-l border-[#D1CAF2]/40 pl-6">
+                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                      <Heart className="w-4 h-4 fill-[#FE9E8F] text-[#FE9E8F]" />
+                      Likes ({viewedImage.likes?.length || 0})
+                    </h3>
+                    <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                      {!viewedImage.likes || viewedImage.likes.length === 0 ? (
+                        <p className="text-sm text-[#171C3C]/40 italic">No likes yet</p>
+                      ) : (
+                        viewedImage.likes.map((like, index) => (
+                          <div key={index} className="flex items-center gap-2 text-sm text-[#171C3C]/70 font-medium p-2 bg-[#FE9E8F]/5 rounded-lg">
+                            <div className="w-6 h-6 rounded-full bg-[#FE9E8F]/20 flex items-center justify-center text-[#FE9E8F] text-xs font-bold shrink-0">
+                              {(like.userName && like.userName.length > 0) ? like.userName.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <span className="truncate">{like.userName || 'A user'}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

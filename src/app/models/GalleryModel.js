@@ -44,15 +44,41 @@ const GallerySchema = new mongoose.Schema(
             trim: true,
         }],
 
-        // Engagement
         likes: {
-            type: Number,
-            default: 0,
+            type: [mongoose.Schema.Types.Mixed],
+            default: []
         },
+        comments: [{
+            user: {
+                type: String,
+                required: true,
+            },
+            userName: {
+                type: String,
+                required: true,
+            },
+            text: {
+                type: String,
+                required: true,
+                trim: true,
+            },
+            status: {
+                type: String,
+                enum: ['approved', 'hidden'],
+                default: 'approved',
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now,
+            }
+        }],
         views: {
             type: Number,
             default: 0,
         },
+        viewedBy: [{
+            type: String
+        }],
 
         // Display Options
         featured: {
