@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 import dbConnect from '@/app/lib/db';
 import GalleryModel from '@/app/models/GalleryModel';
 
-// Simple bad-words filter list (for demonstration/moderation)
-const BAD_WORDS = ['spam', 'scam', 'fake', 'stupid', 'idiot', 'ugly', 'hate', 'trash', 'crap'];
+import vader from 'vader-sentiment';
 
 export async function POST(request, { params }) {
     try {
@@ -22,10 +21,9 @@ export async function POST(request, { params }) {
             return NextResponse.json({ success: false, message: 'Image not found' }, { status: 404 });
         }
 
-        // Moderation Check
-        const lowerCaseText = text.toLowerCase();
-        const containsBadWords = BAD_WORDS.some(word => lowerCaseText.includes(word));
-        const status = containsBadWords ? 'hidden' : 'approved';
+        // Moderation Check using vader-sentiment
+        const intensity = vader.SentimentIntensityAnalyzer.polarity_scores(text);
+        const status = intensity.compound < 0 ? 'hidden' : 'approved';
 
         const newComment = {
             user: userId,

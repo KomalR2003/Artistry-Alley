@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Users, Palette, DollarSign, Activity, Shield, AlertCircle,
   CheckCircle, Clock, MoreHorizontal, Search, ShoppingBag,
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/dashboard");
+      const res = await fetch("/api/admin/dashboard", { cache: 'no-store' });
       const json = await res.json();
 
       if (json.success && json.data) {
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-1 justify-end font-bold text-[#171C3C] text-sm">
                       <Star className="w-3 h-3 text-[#FE9E8F] fill-[#FE9E8F]" /> {artist.rating}
                     </div>
-                    <p className="text-[11px] text-[#4ADE80] font-bold">{artist.likes?.length || 0} Likes</p>
+                    <p className="text-[11px] text-[#4ADE80] font-bold">{artist.likes || 0} Likes</p>
                   </div>
                 </div>
               ))}

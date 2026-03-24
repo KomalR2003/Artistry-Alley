@@ -3,8 +3,8 @@
 import dbConnect  from '@/app/lib/db';
 // import EventRegistration from '@/models/EventRegistrationModel';
 // import EventModel from '@/models/EventModel';
-import EventModel from '../../../../models/EventModel';
-import EventRegistration from '../../../../models/EventRegistrationModel';
+import EventModel from '@/app/models/EventModel';
+import EventRegistration from '@/app/models/EventRegistrationModel';
 
 export async function GET(req) {
     try {

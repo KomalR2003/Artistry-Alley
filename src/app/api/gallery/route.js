@@ -1,6 +1,9 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import dbConnect from "@/app/lib/db";
+// Trigger rebuild
 import GalleryModel from "@/app/models/GalleryModel";
+
+export const dynamic = 'force-dynamic';
 
 // POST - Add new gallery image
 export async function POST(request) {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '../../../../lib/db';
-import Event from '../../../../models/EventModel';
+import dbConnect from '@/app/lib/db';
+import Event from '@/app/models/EventModel';
 
 // PUT update an event
 export async function PUT(req, { params }) {

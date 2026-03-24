@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
     TrendingUp,
     Users,
@@ -212,7 +212,10 @@ export default function Dashboard() {
                             totalGalleryImages = allImages.length;
                             galleryLikes = allImages.reduce((sum, img) => sum + (img.likes?.length || 0), 0);
                             galleryAlbums = [...new Set(allImages.map(img => img.category))].length;
-                            galleryComments = allImages.reduce((sum, img) => sum + (img.comments?.length || 0), 0);
+                            galleryComments = allImages.reduce((sum, img) => {
+                                const allComments = img.comments || [];
+                                return sum + allComments.length;
+                            }, 0);
                         }
 
                         setDashboardStats(prev => {

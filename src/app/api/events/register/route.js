@@ -1,9 +1,9 @@
 ﻿import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import dbConnect from '../../../../app/lib/db';
-import EventRegistration from '../../../../app/models/EventRegistrationModel';
-import EventModel from '../../../../app/models/EventModel';
-import { sendEventRegistrationEmail, sendArtistEventRegistrationAlertEmail } from '../../../../app/lib/emailService';
+import dbConnect from '@/app/lib/db';
+import EventRegistration from '@/app/models/EventRegistrationModel';
+import EventModel from '@/app/models/EventModel';
+import { sendEventRegistrationEmail, sendArtistEventRegistrationAlertEmail } from '@/app/lib/emailService';
 
 export async function POST(req) {
     try {

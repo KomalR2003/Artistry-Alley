@@ -226,7 +226,7 @@ export default function Login() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="â€¢â€¢â€¢â€¢"
+                  placeholder="........"
                   value={form.password}
                   onChange={(e) => update("password", e.target.value)}
                   required

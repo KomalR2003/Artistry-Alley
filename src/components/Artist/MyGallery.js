@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState, useEffect } from 'react';
 import { Images, Image, Heart, Eye, Plus, Edit, Trash2, Loader2, MessageSquare, X } from 'lucide-react';
 import AddGalleryImageForm from './AddGalleryImageForm';
@@ -52,7 +52,7 @@ const MyGallery = () => {
     setError('');
 
     try {
-      const response = await fetch(`/api/gallery?artistId=${userId}&status=active`);
+      const response = await fetch(`/api/gallery?artistId=${userId}&status=active&t=${new Date().getTime()}`);
       const data = await response.json();
 
       if (data.success) {
@@ -64,8 +64,8 @@ const MyGallery = () => {
         const totalLikes = data.images.reduce((sum, img) => sum + (img.likes?.length || 0), 0);
         const totalViews = data.images.reduce((sum, img) => sum + (img.views || 0), 0);
         const totalComments = data.images.reduce((sum, img) => {
-          const approvedComments = img.comments?.filter(c => c.status === 'approved') || [];
-          return sum + approvedComments.length;
+          const allComments = img.comments || [];
+          return sum + allComments.length;
         }, 0);
 
         setStats({
@@ -284,7 +284,7 @@ const MyGallery = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <MessageSquare className="w-4 h-4" />
-                    <span>{image.comments?.filter(c => c.status === 'approved').length || 0}</span>
+                    <span>{image.comments?.length || 0}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Eye className="w-4 h-4" />
@@ -369,9 +369,9 @@ const MyGallery = () => {
             </div>
 
             {/* Right Details Section */}
-            <div className="w-full md:w-1/2 flex flex-col h-[50vh] md:h-auto overflow-y-auto custom-scrollbar bg-white">
-              <div className="p-8">
-                <div className="mb-6">
+            <div className="w-full md:w-1/2 flex flex-col h-[50vh] md:h-auto md:max-h-[90vh] bg-white">
+              <div className="p-8 flex flex-col h-full">
+                <div className="mb-6 shrink-0">
                   <h2 className="text-3xl font-black text-[#171C3C] mb-2 tracking-tight">
                     {viewedImage.title}
                   </h2>
@@ -382,26 +382,26 @@ const MyGallery = () => {
                 </div>
 
                 {viewedImage.description && (
-                  <p className="text-[#171C3C]/70 mb-8 leading-relaxed text-sm">
+                  <p className="text-[#171C3C]/70 mb-8 leading-relaxed text-sm shrink-0">
                     {viewedImage.description}
                   </p>
                 )}
 
                 {/* Engagement Panels */}
-                <div className="flex gap-6 border-t border-[#D1CAF2]/40 pt-6">
+                <div className="flex gap-6 border-t border-[#D1CAF2]/40 pt-6 flex-1 min-h-0">
 
                   {/* Comments Panel */}
-                  <div className="flex-1">
-                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <MessageSquare className="w-4 h-4 text-[#98C4EC]" />
-                      Comments ({viewedImage.comments?.filter(c => c.status === 'approved').length || 0})
+                      Comments ({viewedImage.comments?.length || 0})
                     </h3>
-                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                      {!viewedImage.comments || viewedImage.comments.filter(c => c.status === 'approved').length === 0 ? (
-                        <p className="text-sm text-[#171C3C]/40 italic">No comments yet</p>
+                    <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1 pb-2">
+                      {!viewedImage.comments || viewedImage.comments.length === 0 ? (
+                        <p className="text-sm text-[#171C3C]/40 italic shrink-0">No comments yet</p>
                       ) : (
-                        viewedImage.comments.filter(c => c.status === 'approved').map((comment, index) => (
-                          <div key={index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30">
+                        viewedImage.comments.map((comment, index) => (
+                          <div key={comment._id || index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30 shrink-0">
                             <h4 className="font-bold text-[#171C3C] text-xs mb-1">{comment.userName || 'Anonymous'}</h4>
                             <p className="text-sm text-[#171C3C]/70">{comment.text}</p>
                           </div>
@@ -411,17 +411,17 @@ const MyGallery = () => {
                   </div>
 
                   {/* Likes Panel */}
-                  <div className="flex-1 border-l border-[#D1CAF2]/40 pl-6">
-                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                  <div className="flex-1 flex flex-col min-h-0 border-l border-[#D1CAF2]/40 pl-6">
+                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <Heart className="w-4 h-4 fill-[#FE9E8F] text-[#FE9E8F]" />
                       Likes ({viewedImage.likes?.length || 0})
                     </h3>
-                    <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1 pb-2">
                       {!viewedImage.likes || viewedImage.likes.length === 0 ? (
-                        <p className="text-sm text-[#171C3C]/40 italic">No likes yet</p>
+                        <p className="text-sm text-[#171C3C]/40 italic shrink-0">No likes yet</p>
                       ) : (
                         viewedImage.likes.map((like, index) => (
-                          <div key={index} className="flex items-center gap-2 text-sm text-[#171C3C]/70 font-medium p-2 bg-[#FE9E8F]/5 rounded-lg">
+                          <div key={index} className="flex items-center gap-2 text-sm text-[#171C3C]/70 font-medium p-2 bg-[#FE9E8F]/5 rounded-lg shrink-0">
                             <div className="w-6 h-6 rounded-full bg-[#FE9E8F]/20 flex items-center justify-center text-[#FE9E8F] text-xs font-bold shrink-0">
                               {(like.userName && like.userName.length > 0) ? like.userName.charAt(0).toUpperCase() : 'U'}
                             </div>

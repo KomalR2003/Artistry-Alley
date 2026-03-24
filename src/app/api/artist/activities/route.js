@@ -3,7 +3,7 @@ import dbConnect from '@/app/lib/db';
 import OrderModel from '@/app/models/OrderModel';
 import EventRegistrationModel from '@/app/models/EventRegistrationModel';
 import GalleryModel from '@/app/models/GalleryModel';
-import UserModel from '@/app/models/UserModel';
+import UserModel from '@/app/models/userModel';
 
 export async function GET(request) {
     try {

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Image, Images, Heart, Trash2, Search, AlertTriangle, User, Folder, Edit2, Eye, MessageSquare, X } from 'lucide-react';
 const ManageGallery = () => {
   const [artworks, setArtworks] = useState([]);
@@ -380,16 +380,22 @@ const ManageGallery = () => {
                   <div className="flex-1">
                     <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
                       <MessageSquare className="w-4 h-4 text-[#98C4EC]" />
-                      Comments ({viewedItem.comments?.filter(c => c.status === 'approved').length || 0})
+                      Comments ({viewedItem.comments?.length || 0})
                     </h3>
                     <div className="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                      {!viewedItem.comments || viewedItem.comments.filter(c => c.status === 'approved').length === 0 ? (
+                      {!viewedItem.comments || viewedItem.comments.length === 0 ? (
                         <p className="text-sm text-[#171C3C]/40 italic">No comments yet</p>
                       ) : (
-                        viewedItem.comments.filter(c => c.status === 'approved').map((comment, index) => (
-                          <div key={index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30">
+                        viewedItem.comments.map((comment, index) => (
+                          <div key={comment._id || index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30">
                             <h4 className="font-bold text-[#171C3C] text-xs mb-1">{comment.userName || 'Anonymous'}</h4>
                             <p className="text-sm text-[#171C3C]/70">{comment.text}</p>
+                            {/* Admin badge for hidden comments */}
+                            {comment.status === 'hidden' && (
+                              <span className="inline-block mt-2 text-[10px] uppercase font-bold tracking-wider text-red-500 bg-red-50 px-2 py-0.5 rounded border border-red-100">
+                                Hidden
+                              </span>
+                            )}
                           </div>
                         ))
                       )}

@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 import React, { useState, useEffect } from 'react';
-import { Images, Palette, TrendingUp, Heart, Eye, Search, Filter, X, Loader2, Star } from 'lucide-react';
+import { Images, Palette, Heart, Eye, Search, Filter, X, Loader2, Star } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Gallery() {
     const [images, setImages] = useState([]);
@@ -23,8 +24,9 @@ export default function Gallery() {
 
     // Auth and Engagement State
     const [currentUser, setCurrentUser] = useState(null);
-    const [newComment, setNewComment] = useState('');
+    const [modalComment, setModalComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [detailComment, setDetailComment] = useState('');
 
     useEffect(() => {
         fetchImages();
@@ -144,12 +146,18 @@ export default function Gallery() {
         setSelectedArtist('all');
     };
 
+    const getHasLiked = (img) => {
+        const userId = currentUser?.id?.toString();
+        if (!userId) return false;
+        return (img?.likes || []).some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === userId);
+    };
+
     const handleLike = async (e, targetImage = selectedImage) => {
         if (e) {
             e.preventDefault();
             e.stopPropagation();
         }
-        if (!currentUser) return alert("Please log in to like artworks");
+        if (!currentUser) return toast.error("Please log in to like artworks");
         if (!targetImage) return;
 
         try {
@@ -166,12 +174,14 @@ export default function Gallery() {
                 if (data.hasLiked) {
                     // We just liked it, so add our ID
                     newLikes = [...(targetImage.likes || []), { user: currentUser.id, userName: currentUser.name }];
+                    toast.success('Liked');
                 } else {
                     // We just unliked it, so remove our ID using safe parsing for Mixed types
                     newLikes = (targetImage.likes || []).filter(like => {
                         const likeUserId = (like && like.user) ? like.user.toString() : (like ? like.toString() : null);
                         return likeUserId !== currentUser.id.toString();
                     });
+                    toast.success('Unliked');
                 }
 
                 const updatedImage = { ...targetImage, likes: newLikes };
@@ -189,20 +199,21 @@ export default function Gallery() {
         }
     };
 
-    const handleComment = async (e) => {
+    const handleComment = async (e, { targetImage = selectedImage, text, clearText } = {}) => {
         e.preventDefault();
-        if (!currentUser) return alert("Please log in to comment");
-        if (!newComment.trim() || !selectedImage) return;
+        if (!currentUser) return toast.error("Please log in to comment");
+        const trimmed = (text || '').trim();
+        if (!trimmed || !targetImage) return;
 
         setSubmitting(true);
         try {
-            const res = await fetch(`/api/gallery/${selectedImage._id}/comment`, {
+            const res = await fetch(`/api/gallery/${targetImage._id}/comment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userId: currentUser.id,
                     userName: currentUser.name,
-                    text: newComment
+                    text: trimmed
                 })
             });
             const data = await res.json();
@@ -210,17 +221,18 @@ export default function Gallery() {
             if (data.success) {
                 if (data.status === 'approved' && data.comment) {
                     const updatedImage = {
-                        ...selectedImage,
-                        comments: [...(selectedImage.comments || []), data.comment]
+                        ...targetImage,
+                        comments: [...(targetImage.comments || []), data.comment]
                     };
-                    setSelectedImage(updatedImage);
                     setImages(images.map(img => img._id === updatedImage._id ? updatedImage : img));
+                    if (selectedImage && selectedImage._id === updatedImage._id) setSelectedImage(updatedImage);
+                    toast.success('Comment posted');
                 } else {
-                    alert('Your comment was flagged by moderation and is hidden.');
+                    toast('Your comment was flagged by moderation and is hidden.');
                 }
-                setNewComment('');
+                if (typeof clearText === 'function') clearText();
             } else {
-                alert(data.message || 'Failed to post comment');
+                toast.error(data.message || 'Failed to post comment');
             }
         } catch (err) {
             console.error('Error posting comment:', err);
@@ -230,7 +242,7 @@ export default function Gallery() {
     };
 
     return (
-        <div className="w-full h-full bg-white text-[#171C3C] p-8 overflow-y-auto">
+        <div className="w-full h-full bg-white text-[#171C3C] p-4 sm:p-6 lg:p-8 overflow-y-auto">
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-[#171C3C]">
@@ -365,103 +377,220 @@ export default function Gallery() {
                     )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredImages.map((image) => (
-                        <div
-                            key={image._id}
-                            className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all group cursor-pointer"
-                            onClick={() => handleViewImage(image)}
-                        >
-                            {/* Image */}
-                            <div className="relative h-48 bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20 overflow-hidden">
-                                <img
-                                    src={image.imageUrl}
-                                    alt={image.title}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                    onError={(e) => {
-                                        e.target.style.display = 'none';
-                                        e.target.parentElement.querySelector('.fallback-icon').style.display = 'flex';
-                                    }}
-                                />
-                                <div className="fallback-icon hidden items-center justify-center h-full">
-                                    <Images className="w-16 h-16 text-[#D1CAF2]/40" />
-                                </div>
-
-                                {/* Featured Badge */}
-                                {image.featured && (
-                                    <div className="absolute top-2 left-2 bg-[#FE9E8F] text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
-                                        <Star className="w-3 h-3 fill-white" />
-                                        Featured
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Image Details */}
-                            <div className="p-4">
-                                <div className="mb-3">
-                                    <h3 className="font-bold text-[#171C3C] text-lg mb-1 truncate">
-                                        {image.title}
-                                    </h3>
-                                    <p className="text-sm text-[#171C3C]/60">{image.category}</p>
-                                    {image.artistName && (
-                                        <p className="text-xs text-[#171C3C]/50 mt-1">by {image.artistName}</p>
-                                    )}
-                                </div>
-
-                                {image.description && (
-                                    <p className="text-sm text-[#171C3C]/70 mb-4 line-clamp-2">
-                                        {image.description}
-                                    </p>
-                                )}
-
-                                {/* Stats */}
-                                <div className="flex items-center gap-4 mb-4 text-sm text-[#171C3C]/60">
-                                    <div
-                                        className="flex items-center gap-1 cursor-pointer hover:bg-[#FE9E8F]/10 p-1.5 -ml-1.5 rounded-lg transition-colors group"
-                                        onClick={(e) => handleLike(e, image)}
-                                        title={image.likes?.some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === currentUser?.id?.toString()) ? "Unlike" : "Like"}
-                                    >
-                                        <Heart
-                                            className={`w-4 h-4 transition-transform group-hover:scale-110 ${image.likes?.some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === currentUser?.id?.toString()) ? 'fill-[#FE9E8F] text-[#FE9E8F]' : 'group-hover:text-[#FE9E8F]'}`}
-                                        />
-                                        <span className={`group-hover:text-[#FE9E8F] transition-colors ${image.likes?.some(like => ((like && like.user) ? like.user.toString() : (like ? like.toString() : '')) === currentUser?.id?.toString()) ? 'text-[#FE9E8F]' : ''}`}>
-                                            {image.likes?.length || 0}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Eye className="w-4 h-4" />
-                                        <span>{image.views || 0}</span>
-                                    </div>
-                                </div>
-
-                                {/* Tags */}
-                                {image.tags && image.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mb-4">
-                                        {image.tags.slice(0, 3).map((tag, index) => (
-                                            <span
-                                                key={index}
-                                                className="bg-[#D1CAF2]/10 text-[#171C3C]/70 px-2 py-1 rounded text-xs"
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* View Button */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1.8fr_1fr] gap-6">
+                    {/* Thumbnail Gallery Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {filteredImages.map((image) => {
+                            const hasLiked = getHasLiked(image);
+                            const approvedComments = (image.comments || []).filter(c => c?.status === 'approved');
+                            const approvedCount = approvedComments.length;
+                            return (
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
+                                    key={image._id}
+                                    type="button"
+                                    onClick={() => {
+                                        setDetailComment('');
                                         handleViewImage(image);
                                     }}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#171C3C] text-white rounded-lg hover:bg-[#171C3C]/90 transition-colors font-medium"
+                                    className="group w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-all text-left"
+                                    title="Open artwork"
                                 >
-                                    <Eye className="w-4 h-4" />
-                                    View Details
+                                    <div className="relative bg-gradient-to-br from-[#D1CAF2]/25 to-[#98C4EC]/25 overflow-hidden">
+                                        <img
+                                            src={image.imageUrl}
+                                            alt={image.title}
+                                            className="w-full h-36 sm:h-40 md:h-40 xl:h-44 object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.querySelector('.fallback-icon').style.display = 'flex';
+                                            }}
+                                        />
+                                        <div className="fallback-icon hidden items-center justify-center h-36 sm:h-40 md:h-40 xl:h-44">
+                                            <Images className="w-14 h-14 text-[#D1CAF2]/50" />
+                                        </div>
+
+                                        {image.featured && (
+                                            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-xs font-semibold text-[#171C3C] flex items-center gap-1 shadow">
+                                                <Star className="w-3 h-3 fill-[#FE9E8F] text-[#FE9E8F]" />
+                                                Featured
+                                            </div>
+                                        )}
+
+                                        {/* Hover overlay */}
+                                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                                    </div>
+
+                                    {/* Minimal meta (gallery style) */}
+                                    <div className="px-3 py-2">
+                                        <div className="text-sm font-semibold text-[#171C3C] truncate">{image.title}</div>
+                                        <div className="mt-0.5 text-xs text-[#171C3C]/55 truncate">
+                                            {image.artistName || image.category}
+                                        </div>
+                                    </div>
+
+                                    {/* Always-visible interactions */}
+                                    <div className="px-3 pb-3">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handleLike(e, image)}
+                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FE9E8F]/10 hover:bg-[#FE9E8F]/15 transition-colors"
+                                                aria-label={hasLiked ? 'Unlike' : 'Like'}
+                                                title={hasLiked ? 'Unlike' : 'Like'}
+                                            >
+                                                <Heart className={`w-4 h-4 ${hasLiked ? 'fill-[#FE9E8F] text-[#FE9E8F]' : 'text-[#171C3C]/70'}`} />
+                                                <span className="text-xs font-semibold text-[#171C3C]/80">{image.likes?.length || 0}</span>
+                                            </button>
+
+                                            <div
+                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#98C4EC]/15 transition-colors"
+                                                title="Comments"
+                                            >
+                                                <span className="text-xs font-semibold text-[#171C3C]/80">{approvedCount} comments</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Detail Panel */}
+                    <aside className="hidden lg:block sticky top-24 h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                        {selectedImage ? (
+                            <div className="h-full flex flex-col">
+                                <div className="p-5 border-b border-gray-100">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="min-w-0">
+                                            <div className="text-xl font-extrabold text-[#171C3C] truncate">{selectedImage.title}</div>
+                                            <div className="text-sm text-[#171C3C]/60 truncate">
+                                                {selectedImage.artistName ? `by ${selectedImage.artistName}` : selectedImage.category}
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsViewModalOpen(false)}
+                                            className="hidden"
+                                        />
+                                    </div>
+
+                                    <div className="mt-4 flex items-center gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleLike(e, selectedImage)}
+                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#FE9E8F]/40 text-[#171C3C] hover:bg-[#FE9E8F]/10 transition-colors font-semibold"
+                                        >
+                                            <Heart className={`w-5 h-5 ${getHasLiked(selectedImage) ? 'fill-[#FE9E8F] text-[#FE9E8F]' : 'text-[#171C3C]/80'}`} />
+                                            <span>{selectedImage.likes?.length || 0}</span>
+                                        </button>
+                                        <div className="text-sm text-[#171C3C]/60 flex items-center gap-2">
+                                            <Eye className="w-4 h-4" />
+                                            {selectedImage.views || 0}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-5 overflow-y-auto flex-1">
+                                    <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20">
+                                        <img
+                                            src={selectedImage.imageUrl}
+                                            alt={selectedImage.title}
+                                            className="w-full max-h-64 object-cover"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.querySelector('.fallback-icon').style.display = 'flex';
+                                            }}
+                                        />
+                                        <div className="fallback-icon hidden items-center justify-center max-h-64 h-64">
+                                            <Images className="w-16 h-16 text-[#D1CAF2]/40" />
+                                        </div>
+                                    </div>
+
+                                    {selectedImage.description ? (
+                                        <div className="mt-4 text-sm text-[#171C3C]/75 leading-relaxed">
+                                            {selectedImage.description}
+                                        </div>
+                                    ) : null}
+
+                                    <div className="mt-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-sm font-bold text-[#171C3C]">Comments</div>
+                                            <div className="text-xs text-[#171C3C]/50">
+                                                {(selectedImage.comments || []).filter(c => c?.status === 'approved').length}
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 space-y-3">
+                                            {(selectedImage.comments || []).filter(c => c?.status === 'approved').length > 0 ? (
+                                                (selectedImage.comments || [])
+                                                    .filter(c => c?.status === 'approved')
+                                                    .slice(-10)
+                                                    .map((comment, idx) => (
+                                                        <div key={comment._id || idx} className="rounded-xl bg-gray-50 p-3">
+                                                            <div className="text-sm">
+                                                                <span className="font-semibold text-[#171C3C] mr-2">{comment.userName}</span>
+                                                                <span className="text-[#171C3C]/80 whitespace-pre-wrap">{comment.text}</span>
+                                                            </div>
+                                                            <div className="text-xs text-[#171C3C]/40 mt-1">
+                                                                {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                            ) : (
+                                                <div className="text-sm text-[#171C3C]/40 italic">No comments yet. Be the first!</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-4 border-t border-gray-100">
+                                    {currentUser ? (
+                                        <form
+                                            onSubmit={(e) => handleComment(e, {
+                                                targetImage: selectedImage,
+                                                text: detailComment,
+                                                clearText: () => setDetailComment('')
+                                            })}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <input
+                                                type="text"
+                                                value={detailComment}
+                                                onChange={(e) => setDetailComment(e.target.value)}
+                                                placeholder="Write a comment..."
+                                                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#98C4EC] focus:ring-2 focus:ring-[#98C4EC]/20 transition-all text-sm"
+                                                disabled={submitting}
+                                            />
+                                            <button
+                                                type="submit"
+                                                disabled={!detailComment.trim() || submitting}
+                                                className="px-5 py-3 bg-[#171C3C] text-white rounded-xl hover:bg-[#171C3C]/90 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {submitting ? 'Posting...' : 'Post'}
+                                            </button>
+                                        </form>
+                                    ) : (
+                                        <div className="bg-orange-50 text-orange-700 p-3 rounded-xl text-sm text-center">
+                                            Please log in to comment or like.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ) : (
+                            <div className="h-full flex items-center justify-center p-8 text-center">
+                                <div>
+                                    <div className="mx-auto w-12 h-12 rounded-2xl bg-[#D1CAF2]/25 flex items-center justify-center mb-3">
+                                        <Images className="w-6 h-6 text-[#171C3C]/70" />
+                                    </div>
+                                    <div className="font-bold text-[#171C3C]">Pick an artwork</div>
+                                    <div className="text-sm text-[#171C3C]/60 mt-1">
+                                        Click any card to view details and comments here.
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </aside>
                 </div>
             )}
 
@@ -600,18 +729,22 @@ export default function Gallery() {
 
                                 {/* Comment Form */}
                                 {currentUser ? (
-                                    <form onSubmit={handleComment} className="flex gap-3">
+                                    <form onSubmit={(e) => handleComment(e, {
+                                        targetImage: selectedImage,
+                                        text: modalComment,
+                                        clearText: () => setModalComment('')
+                                    })} className="flex gap-3">
                                         <input
                                             type="text"
-                                            value={newComment}
-                                            onChange={(e) => setNewComment(e.target.value)}
+                                            value={modalComment}
+                                            onChange={(e) => setModalComment(e.target.value)}
                                             placeholder="Write a completely appropriate comment..."
                                             className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#98C4EC] focus:ring-2 focus:ring-[#98C4EC]/20 transition-all text-sm"
                                             disabled={submitting}
                                         />
                                         <button
                                             type="submit"
-                                            disabled={!newComment.trim() || submitting}
+                                            disabled={!modalComment.trim() || submitting}
                                             className="px-6 py-3 bg-[#171C3C] text-white rounded-xl hover:bg-[#171C3C]/90 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {submitting ? 'Posting...' : 'Post'}

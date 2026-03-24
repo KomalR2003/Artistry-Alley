@@ -71,6 +71,7 @@ export async function DELETE(request) {
 export async function PUT(request) {
     try {
         await dbConnect();
+        const data = await request.json();
         const { id, title, description, eventType, startDate, endDate, startTime, endTime, location, isFree, price, status } = data;
 
         if (!id) {

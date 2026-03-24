@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/app/lib/db";
+
+export const dynamic = 'force-dynamic';
 import UserModel from "@/app/models/userModel";
 import GalleryModel from "@/app/models/GalleryModel";
 import ProductModel from "@/app/models/ProductModel";
@@ -58,7 +60,7 @@ export async function GET(request) {
 
         // Process Gallery Stats
         const totalArts = activeGallery.length;
-        const totalLikes = activeGallery.reduce((sum, item) => sum + (item.likes || 0), 0);
+        const totalLikes = activeGallery.reduce((sum, item) => sum + (Array.isArray(item.likes) ? item.likes.length : 0), 0);
         const uniqueAlbumsTemp = new Set();
         activeGallery.forEach(item => {
             if (item.category) uniqueAlbumsTemp.add(item.category);
@@ -97,7 +99,7 @@ export async function GET(request) {
                 id: artist._id,
                 name: artist.username || artist.name || 'Artist',
                 sales: `₹${(sales * 1000).toLocaleString()}`,
-                likes: activeGallery.filter(g => g.artistId && g.artistId.toString() === artist._id.toString()).reduce((sum, item) => sum + (item.likes || 0), 0) + 'k',
+                likes: activeGallery.filter(g => g.artistId && g.artistId.toString() === artist._id.toString()).reduce((sum, item) => sum + (Array.isArray(item.likes) ? item.likes.length : 0), 0),
                 artworks: artistProductsCount.toString(),
                 rating: artist.rating ? artist.rating.toString() : "4.8",
                 avatarColor: "bg-pink-600",

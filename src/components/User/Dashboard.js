@@ -1,10 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Activity, ShoppingBag, Calendar as CalendarIcon, Package, MapPin, Clock, Loader2, Search, ArrowRight } from 'lucide-react';
 
 export default function Dashboard({ onNavigate, user }) {
     const [orders, setOrders] = useState([]);
     const [registrations, setRegistrations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeUser, setActiveUser] = useState(user || null);
 
     const initialStats = [
         {
@@ -39,12 +40,56 @@ export default function Dashboard({ onNavigate, user }) {
     useEffect(() => {
         const localUserId = sessionStorage.getItem('userId');
         const localEmail = sessionStorage.getItem('userEmail');
-        const localName = sessionStorage.getItem('userName');
+        const localName =
+            sessionStorage.getItem('userName') ||
+            sessionStorage.getItem('username') ||
+            sessionStorage.getItem('name');
+        const localUsername = sessionStorage.getItem('username');
+        const localProfilePicture =
+            sessionStorage.getItem('profilePicture') ||
+            sessionStorage.getItem('userProfilePicture') ||
+            sessionStorage.getItem('userAvatar') ||
+            '';
 
-        const activeUser = user || (localUserId ? { _id: localUserId, id: localUserId, email: localEmail, name: localName } : null);
+        const resolvedUser =
+            user ||
+            (localUserId
+                ? { _id: localUserId, id: localUserId, email: localEmail, name: localName, username: localUsername }
+                : null);
 
-        if (activeUser) {
-            fetchDashboardData(activeUser);
+        if (resolvedUser && localProfilePicture && !resolvedUser.profilePicture) {
+            resolvedUser.profilePicture = localProfilePicture;
+        }
+
+        setActiveUser(resolvedUser);
+
+        if (resolvedUser) {
+            fetchDashboardData(resolvedUser);
+            // Ensure we show the actual saved profile picture from DB (not initials)
+            if (resolvedUser._id || resolvedUser.id) {
+                const id = resolvedUser._id || resolvedUser.id;
+                fetch(`/api/user?userId=${encodeURIComponent(id)}`)
+                    .then((r) => r.json())
+                    .then((data) => {
+                        if (data?.success && data?.user) {
+                            setActiveUser((prev) => {
+                                if (!prev) return prev;
+                                return {
+                                    ...prev,
+                                    username: data.user.username || prev.username,
+                                    email: data.user.email || prev.email,
+                                    profilePicture: data.user.profilePicture || prev.profilePicture
+                                };
+                            });
+                            if (data.user.profilePicture) {
+                                try {
+                                    sessionStorage.setItem('profilePicture', data.user.profilePicture);
+                                } catch { }
+                            }
+                        }
+                    })
+                    .catch(() => { });
+            }
         } else {
             setLoading(false);
         }
@@ -127,20 +172,33 @@ export default function Dashboard({ onNavigate, user }) {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-black">
-                        Welcome back, <span className="text-black">{user?.name ? user.name.split(' ')[0] : 'Curator'}</span>
+                        Welcome back,{" "}
+                        <span className="text-black">
+                            {(activeUser?.name || activeUser?.username || 'User').split(' ')[0]}
+                        </span>
                     </h1>
                     <p className="text-[#171C3C]/70 mt-1">
                         Here is an overview of your collection and schedule.
                     </p>
                 </div>
-                {/* Search Bar Mockup */}
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#171C3C]/50" />
-                    <input
-                        type="text"
-                        placeholder="Search artworks, events..."
-                        className="pl-10 pr-4 py-2 bg-white border border-[#D1CAF2]/40 rounded-lg text-sm focus:outline-none focus:border-[#98C4EC] transition-colors w-64 text-[#171C3C]"
-                    />
+
+                {/* Dashboard-only profile */}
+                <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
+                    <div
+                        className="w-12 h-12 rounded-full bg-[#171C3C] bg-cover bg-center flex items-center justify-center text-sm font-extrabold text-white shrink-0"
+                        style={{ backgroundImage: activeUser?.profilePicture ? `url(${activeUser.profilePicture})` : undefined }}
+                        aria-label="Profile picture"
+                    >
+                        {!activeUser?.profilePicture && ((activeUser?.name || activeUser?.username || 'U').charAt(0).toUpperCase())}
+                    </div>
+                    <div className="min-w-0">
+                        <div className="font-bold text-[#171C3C] truncate max-w-[220px]">
+                            {activeUser?.name || activeUser?.username || 'User'}
+                        </div>
+                        <div className="text-sm text-[#171C3C]/60 truncate max-w-[220px]">
+                            {activeUser?.username ? `@${activeUser.username}` : (activeUser?.email || '')}
+                        </div>
+                    </div>
                 </div>
             </div>
 
