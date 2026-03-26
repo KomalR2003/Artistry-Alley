@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   LayoutDashboard,
-  ShoppingBag
+  ShoppingBag,
+  MessageSquare
 } from "lucide-react";
 
 import Link from "next/link";
@@ -36,6 +37,7 @@ const navItems = [
   { label: "ManageProducts", icon: Box, href: "/admin", roles: ["admin"] },
   { label: "ManageEvents", icon: Calendar, href: "/admin", roles: ["admin"] },
   { label: "ManageTeam", icon: Users, href: "/admin", roles: ["admin"] },
+  { label: "ManageComments", icon: MessageSquare, href: "/admin", roles: ["admin"] },
   // { label: "Manage Blogs", icon: ImageIcon, href: "/blogs", roles: ["admin"] },
 
   { label: "MyDashboard", icon: FileText, href: "/artist", roles: ["artist"] },

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import dbConnect from '@/app/lib/db';
 import GalleryModel from '@/app/models/GalleryModel';
 
-import vader from 'vader-sentiment';
+import { checkContentToxicity } from '@/app/lib/moderation';
 
 export async function POST(request, { params }) {
     try {
@@ -21,9 +21,9 @@ export async function POST(request, { params }) {
             return NextResponse.json({ success: false, message: 'Image not found' }, { status: 404 });
         }
 
-        // Moderation Check using vader-sentiment
-        const intensity = vader.SentimentIntensityAnalyzer.polarity_scores(text);
-        const status = intensity.compound < 0 ? 'hidden' : 'approved';
+        // Moderation Check using OpenAI
+        const moderationResult = await checkContentToxicity(text);
+        const status = moderationResult.status;
 
         const newComment = {
             user: userId,
@@ -36,11 +36,11 @@ export async function POST(request, { params }) {
         galleryImage.comments.push(newComment);
         await galleryImage.save();
 
-        // Optional: Do not return the comment to the frontend entirely if it's hidden to immediately reflect it in UI
+        // We always return the comment, let the frontend decide whether to show it based on status
         return NextResponse.json({
             success: true,
-            message: 'Comment added',
-            comment: status === 'approved' ? newComment : null,
+            message: status === 'hidden' ? 'Comment submitted for review' : 'Comment added',
+            comment: newComment,
             status: status
         });
 

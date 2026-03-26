@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Sidebar from "@/components/Sidebar";
@@ -9,6 +9,7 @@ import ManageEvents from "../../components/Admin/ManageEvents";
 import ManageGallery from "../../components/Admin/ManageGallery";
 import ManageProducts from "../../components/Admin/ManageProducts";
 import ManageTeam from "../../components/Admin/ManageTeam";
+import ManageComments from "../../components/Admin/ManageComments";
 
 export default function AdminPage() {
     const router = useRouter();
@@ -41,6 +42,7 @@ export default function AdminPage() {
             case "ManageGallery": return <ManageGallery />;
             case "ManageProducts": return <ManageProducts />;
             case "ManageTeam": return <ManageTeam />;
+            case "ManageComments": return <ManageComments />;
             default: return <AdminDashboard />;
         }
     };

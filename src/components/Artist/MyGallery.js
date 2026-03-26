@@ -349,7 +349,7 @@ const MyGallery = () => {
       {/* View Engagement Modal */}
       {isViewModalOpen && viewedImage && (
         <div className="fixed inset-0 z-50 bg-[#171C3C]/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-          <div className="bg-[#FAFAFA] rounded-3xl w-full max-w-5xl max-h-[90vh] shadow-2xl animate-fade-in relative flex flex-col md:flex-row overflow-hidden border border-[#D1CAF2]/30">
+          <div className="bg-[#FAFAFA] rounded-3xl w-full max-w-5xl h-auto max-h-[90vh] shadow-2xl animate-fade-in relative flex flex-col md:flex-row overflow-hidden border border-[#D1CAF2]/30">
             {/* Close Button */}
             <button
               onClick={() => setIsViewModalOpen(false)}
@@ -359,18 +359,18 @@ const MyGallery = () => {
             </button>
 
             {/* Left Image Section */}
-            <div className="w-full md:w-1/2 bg-[#171C3C] flex items-center justify-center relative p-8">
+            <div className="w-full md:w-1/2 bg-[#171C3C] flex items-center justify-center relative p-8 h-[40vh] md:h-auto min-h-[300px]">
               <div className="absolute inset-0 bg-gradient-to-br from-[#171C3C] to-[#1a1f40] pointer-events-none"></div>
               <img
                 src={viewedImage.imageUrl}
                 alt={viewedImage.title}
-                className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl relative z-10 border border-white/10"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl relative z-10 border border-white/10"
               />
             </div>
 
             {/* Right Details Section */}
-            <div className="w-full md:w-1/2 flex flex-col h-[50vh] md:h-auto md:max-h-[90vh] bg-white">
-              <div className="p-8 flex flex-col h-full">
+            <div className="w-full md:w-1/2 flex flex-col md:h-auto max-h-[90vh] bg-white border-l border-[#D1CAF2]/30">
+              <div className="p-8 flex flex-col h-full overflow-y-auto custom-scrollbar">
                 <div className="mb-6 shrink-0">
                   <h2 className="text-3xl font-black text-[#171C3C] mb-2 tracking-tight">
                     {viewedImage.title}
@@ -388,21 +388,23 @@ const MyGallery = () => {
                 )}
 
                 {/* Engagement Panels */}
-                <div className="flex gap-6 border-t border-[#D1CAF2]/40 pt-6 flex-1 min-h-0">
+                <div className="flex gap-6 border-t border-[#D1CAF2]/40 pt-6 mt-auto">
 
                   {/* Comments Panel */}
-                  <div className="flex-1 flex flex-col min-h-0">
+                  <div className="flex-1 flex flex-col">
                     <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <MessageSquare className="w-4 h-4 text-[#98C4EC]" />
                       Comments ({viewedImage.comments?.length || 0})
                     </h3>
-                    <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1 pb-2">
+                    <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar pb-2 max-h-[35vh]">
                       {!viewedImage.comments || viewedImage.comments.length === 0 ? (
                         <p className="text-sm text-[#171C3C]/40 italic shrink-0">No comments yet</p>
                       ) : (
                         viewedImage.comments.map((comment, index) => (
                           <div key={comment._id || index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30 shrink-0">
-                            <h4 className="font-bold text-[#171C3C] text-xs mb-1">{comment.userName || 'Anonymous'}</h4>
+                            <div className="flex justify-between items-start mb-1">
+                                <h4 className="font-bold text-[#171C3C] text-xs">{comment.userName || 'Anonymous'}</h4>
+                            </div>
                             <p className="text-sm text-[#171C3C]/70">{comment.text}</p>
                           </div>
                         ))
@@ -411,12 +413,12 @@ const MyGallery = () => {
                   </div>
 
                   {/* Likes Panel */}
-                  <div className="flex-1 flex flex-col min-h-0 border-l border-[#D1CAF2]/40 pl-6">
+                  <div className="flex-1 flex flex-col border-l border-[#D1CAF2]/40 pl-6">
                     <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <Heart className="w-4 h-4 fill-[#FE9E8F] text-[#FE9E8F]" />
                       Likes ({viewedImage.likes?.length || 0})
                     </h3>
-                    <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1 pb-2">
+                    <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar pb-2 max-h-[35vh]">
                       {!viewedImage.likes || viewedImage.likes.length === 0 ? (
                         <p className="text-sm text-[#171C3C]/40 italic shrink-0">No likes yet</p>
                       ) : (

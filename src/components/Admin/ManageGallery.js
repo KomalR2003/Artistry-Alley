@@ -345,19 +345,19 @@ const ManageGallery = () => {
             </button>
 
             {/* Left Image Section */}
-            <div className="w-full md:w-1/2 bg-[#171C3C] flex items-center justify-center relative p-8">
+            <div className="w-full md:w-1/2 bg-[#171C3C] flex items-center justify-center relative p-8 h-[40vh] md:h-auto min-h-[300px]">
               <div className="absolute inset-0 bg-gradient-to-br from-[#171C3C] to-[#1a1f40] pointer-events-none"></div>
               <img
                 src={viewedItem.imageUrl}
                 alt={viewedItem.title}
-                className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl relative z-10 border border-white/10"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl relative z-10 border border-white/10"
               />
             </div>
 
             {/* Right Details Section */}
-            <div className="w-full md:w-1/2 flex flex-col h-[50vh] md:h-auto overflow-y-auto custom-scrollbar bg-white">
-              <div className="p-8">
-                <div className="mb-6">
+            <div className="w-full md:w-1/2 flex flex-col md:h-auto max-h-[90vh] bg-white border-l border-[#D1CAF2]/30">
+              <div className="p-8 flex flex-col h-full overflow-y-auto custom-scrollbar">
+                <div className="mb-6 shrink-0">
                   <h2 className="text-3xl font-black text-[#171C3C] mb-2 tracking-tight">
                     {viewedItem.title} <span className="text-sm font-medium text-black/50 ml-2">by {viewedItem.artistId?.username || viewedItem.artistId?.name || 'Unknown'}</span>
                   </h2>
@@ -368,26 +368,26 @@ const ManageGallery = () => {
                 </div>
 
                 {viewedItem.description && (
-                  <p className="text-[#171C3C]/70 mb-8 leading-relaxed text-sm">
+                  <p className="text-[#171C3C]/70 mb-8 leading-relaxed text-sm shrink-0">
                     {viewedItem.description}
                   </p>
                 )}
 
                 {/* Engagement Panels */}
-                <div className="flex gap-6 border-t border-[#D1CAF2]/40 pt-6">
+                <div className="flex gap-6 border-t border-[#D1CAF2]/40 pt-6 mt-auto">
 
                   {/* Comments Panel */}
-                  <div className="flex-1">
-                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <MessageSquare className="w-4 h-4 text-[#98C4EC]" />
                       Comments ({viewedItem.comments?.length || 0})
                     </h3>
-                    <div className="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar pb-2 max-h-[35vh]">
                       {!viewedItem.comments || viewedItem.comments.length === 0 ? (
-                        <p className="text-sm text-[#171C3C]/40 italic">No comments yet</p>
+                        <p className="text-sm text-[#171C3C]/40 italic shrink-0">No comments yet</p>
                       ) : (
                         viewedItem.comments.map((comment, index) => (
-                          <div key={comment._id || index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30">
+                          <div key={comment._id || index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30 shrink-0">
                             <h4 className="font-bold text-[#171C3C] text-xs mb-1">{comment.userName || 'Anonymous'}</h4>
                             <p className="text-sm text-[#171C3C]/70">{comment.text}</p>
                             {/* Admin badge for hidden comments */}
@@ -403,17 +403,17 @@ const ManageGallery = () => {
                   </div>
 
                   {/* Likes Panel */}
-                  <div className="flex-1 border-l border-[#D1CAF2]/40 pl-6">
-                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                  <div className="flex-1 flex flex-col border-l border-[#D1CAF2]/40 pl-6">
+                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <Heart className="w-4 h-4 fill-[#FE9E8F] text-[#FE9E8F]" />
                       Likes ({viewedItem.likes?.length || 0})
                     </h3>
-                    <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar pb-2 max-h-[35vh]">
                       {!viewedItem.likes || viewedItem.likes.length === 0 ? (
-                        <p className="text-sm text-[#171C3C]/40 italic">No likes yet</p>
+                        <p className="text-sm text-[#171C3C]/40 italic shrink-0">No likes yet</p>
                       ) : (
                         viewedItem.likes.map((like, index) => (
-                          <div key={index} className="flex items-center gap-2 text-sm text-[#171C3C]/70 font-medium p-2 bg-[#FE9E8F]/5 rounded-lg">
+                          <div key={index} className="flex items-center gap-2 text-sm text-[#171C3C]/70 font-medium p-2 bg-[#FE9E8F]/5 rounded-lg shrink-0">
                             <div className="w-6 h-6 rounded-full bg-[#FE9E8F]/20 flex items-center justify-center text-[#FE9E8F] text-xs font-bold shrink-0">
                               {(like.userName && like.userName.length > 0) ? like.userName.charAt(0).toUpperCase() : 'U'}
                             </div>
