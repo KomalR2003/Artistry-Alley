@@ -1,7 +1,9 @@
-﻿'use client';
-import { useState, useEffect } from 'react';
+'use client';
+import { useState, useEffect, useRef } from 'react';
 import Image from "next/image";
 import Avtar from "../../public/Images/avtar.png";
+import { Bell, CheckCheck } from "lucide-react";
+import toast from 'react-hot-toast';
 
 export default function Header() {
   const [username, setUsername] = useState('Guest');
@@ -111,6 +113,77 @@ export default function Header() {
     fetchUserData();
   }, []);
 
+  // Notifications State & Logic
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notifiedSet = useRef(new Set());
+
+  useEffect(() => {
+      const fetchNotifications = async () => {
+          try {
+              const userId = sessionStorage.getItem('userId');
+              if (!userId) return;
+              const res = await fetch(`/api/notifications?userId=${userId}`);
+              const data = await res.json();
+              if (data.success) {
+                  setNotifications(data.notifications);
+                  setUnreadNotifications(data.notifications.filter(n => !n.isRead).length);
+                  
+                  // Pop up unread notifications that we haven't shown yet
+                  const newUnread = data.notifications.filter(n => !n.isRead && !notifiedSet.current.has(n._id));
+                  if (notifiedSet.current.size > 0 && newUnread.length > 0) {
+                      newUnread.forEach(n => {
+                          toast(n.message, {
+                              icon: '🔔',
+                              duration: 5000,
+                          });
+                      });
+                  }
+                  
+                  // Update notified set
+                  data.notifications.forEach(n => notifiedSet.current.add(n._id));
+              }
+          } catch (error) {
+              console.error('Error fetching notifications:', error);
+          }
+      };
+      
+      fetchNotifications();
+      const intervalId = setInterval(fetchNotifications, 10000); // Poll every 10s
+      return () => clearInterval(intervalId);
+  }, []);
+
+  const handleToggleNotifications = async () => {
+      const willOpen = !isNotificationsOpen;
+      setIsNotificationsOpen(willOpen);
+      
+      if (willOpen && unreadNotifications > 0) {
+          try {
+              const userId = sessionStorage.getItem('userId');
+              if(userId) {
+                  await fetch(`/api/notifications/all/read?userId=${userId}`, { method: 'PUT' });
+                  setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+                  setUnreadNotifications(0);
+              }
+          } catch (error) {
+              console.error('Error auto-marking read:', error);
+          }
+      }
+  };
+
+  const markAllAsRead = async () => {
+      try {
+          const userId = sessionStorage.getItem('userId');
+          if(!userId) return;
+          await fetch(`/api/notifications/all/read?userId=${userId}`, { method: 'PUT' });
+          setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+          setUnreadNotifications(0);
+      } catch (error) {
+          console.error('Error marking notifications as read:', error);
+      }
+  };
+
   return (
     <div className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 py-4 px-8 border-b border-gray-200">
       <div className="flex items-center justify-between">
@@ -119,43 +192,95 @@ export default function Header() {
           Good morning! Let art inspire your day ahead.
         </p>
 
-        {/* Right Side: User Profile */}
-        <div className="flex items-center gap-3 ml-auto">
-          <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-blue-200 shadow-md group cursor-pointer">
-            {profilePicture ? (
-              <img
-                src={profilePicture}
-                alt={`${username}'s Avatar`}
-                className="object-cover h-full w-full"
-              />
-            ) : (
-              <Image
-                src={Avtar}
-                alt="User Avatar"
-                width={40}
-                height={40}
-                className="object-cover h-full w-full"
-              />
-            )}
-
-            <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              {uploading ? (
-                <span className="text-[8px] text-white animate-pulse">Wait</span>
-              ) : (
-                <span className="text-[10px] text-white font-semibold flex items-center gap-1">
-                  Edit
-                </span>
+        {/* Right Side: Notifications & User Profile */}
+        <div className="flex items-center gap-6 ml-auto">
+          {/* Notifications Bell */}
+          <div className="relative">
+              <button 
+                  onClick={handleToggleNotifications}
+                  className="p-2 relative bg-white border border-gray-100 shadow-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+              >
+                  <Bell size={22} className={unreadNotifications > 0 ? "text-[#FE9E8F]" : ""} />
+                  {unreadNotifications > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                  )}
+              </button>
+              
+              {/* Notifications Dropdown */}
+              {isNotificationsOpen && (
+                  <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-[100] animate-in slide-in-from-top-2 duration-200">
+                      <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                          <h3 className="font-bold text-gray-800">Notifications</h3>
+                          {unreadNotifications > 0 && (
+                              <button onClick={markAllAsRead} className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition-colors">
+                                  <CheckCheck size={14} /> Mark all read
+                              </button>
+                          )}
+                      </div>
+                      <div className="max-h-[350px] overflow-y-auto no-scrollbar">
+                          {notifications.length === 0 ? (
+                              <div className="p-8 text-center text-gray-400 flex flex-col items-center">
+                                  <Bell className="w-8 h-8 mb-2 opacity-20" />
+                                  <span className="text-sm">You're all caught up!</span>
+                              </div>
+                          ) : (
+                              <div className="divide-y divide-gray-50">
+                                  {notifications.map(notification => (
+                                      <div key={notification._id} className={`p-4 transition-colors hover:bg-gray-50 cursor-pointer ${!notification.isRead ? 'bg-blue-50/30' : ''}`}>
+                                          <div className="flex gap-3">
+                                              <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${!notification.isRead ? 'bg-[#FE9E8F]' : 'bg-transparent'}`}></div>
+                                              <div>
+                                                  <p className={`text-sm ${!notification.isRead ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>{notification.message}</p>
+                                                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium uppercase tracking-wider">{new Date(notification.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} • {new Date(notification.createdAt).toLocaleDateString([], {month:'short', day:'numeric'})}</p>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          )}
+                      </div>
+                  </div>
               )}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-                disabled={uploading}
-              />
-            </label>
           </div>
-          <p className="text-gray-800 font-semibold">{username}</p>
+
+          {/* User Profile - EXACT ORIGINAL LAYOUT */}
+          <div className="flex items-center gap-3">
+            <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-blue-200 shadow-md group cursor-pointer">
+              {profilePicture ? (
+                <img
+                  src={profilePicture}
+                  alt={`${username}'s Avatar`}
+                  className="object-cover h-full w-full"
+                />
+              ) : (
+                <Image
+                  src={Avtar}
+                  alt="User Avatar"
+                  width={40}
+                  height={40}
+                  className="object-cover h-full w-full"
+                />
+              )}
+
+              <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                {uploading ? (
+                  <span className="text-[8px] text-white animate-pulse">Wait</span>
+                ) : (
+                  <span className="text-[10px] text-white font-semibold flex items-center gap-1">
+                    Edit
+                  </span>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                />
+              </label>
+            </div>
+            <p className="text-gray-800 font-semibold">{username}</p>
+          </div>
         </div>
       </div>
     </div>

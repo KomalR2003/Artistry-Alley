@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { Calendar, Plus, MapPin, Clock, Edit2, Trash2, IndianRupee, Users, Image as ImageIcon, Upload } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Plus, MapPin, Clock, Edit2, Trash2, IndianRupee, Users, Image as ImageIcon, Upload, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function MyEvents() {
@@ -461,7 +461,7 @@ export default function MyEvents() {
                   {editingEvent ? 'Edit Event Details' : 'Add New Event'}
                 </h2>
                 <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-                  âœ•
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 

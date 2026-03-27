@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/app/lib/db';
 import GalleryModel from '@/app/models/GalleryModel';
+import NotificationModel from '@/app/models/NotificationModel';
 
 export async function POST(request, { params }) {
     try {
@@ -45,6 +46,16 @@ export async function POST(request, { params }) {
                 userName: userName || 'Anonymous User',
                 createdAt: new Date()
             });
+
+            if (galleryImage.artistId && galleryImage.artistId.toString() !== userId.toString()) {
+                await NotificationModel.create({
+                    userId: galleryImage.artistId,
+                    message: `${userName || 'Someone'} liked your artwork "${galleryImage.title || 'Untitled'}"`,
+                    type: "system",
+                    relatedId: galleryImage._id,
+                    link: "/artist/portfolio"
+                });
+            }
         }
 
         // Must notify Mongoose that a Mixed array was mutated

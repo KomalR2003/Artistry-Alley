@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/app/lib/db';
 import GalleryModel from '@/app/models/GalleryModel';
+import NotificationModel from '@/app/models/NotificationModel';
 
 import { checkContentToxicity } from '@/app/lib/moderation';
 
@@ -35,6 +36,16 @@ export async function POST(request, { params }) {
 
         galleryImage.comments.push(newComment);
         await galleryImage.save();
+
+        if (status !== 'hidden' && galleryImage.artistId && galleryImage.artistId.toString() !== userId.toString()) {
+            await NotificationModel.create({
+                userId: galleryImage.artistId,
+                message: `${userName || 'Someone'} commented on your artwork "${galleryImage.title || 'Untitled'}": "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`,
+                type: 'system',
+                relatedId: galleryImage._id,
+                link: '/artist/portfolio'
+            });
+        }
 
         // We always return the comment, let the frontend decide whether to show it based on status
         return NextResponse.json({

@@ -411,9 +411,9 @@ export default function Gallery() {
                     )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-[1.8fr_1fr] gap-6">
-                    {/* Thumbnail Gallery Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="w-full">
+                    {/* Exquisite Full-Width Gallery Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8">
                         {filteredImages.map((image) => {
                             const hasLiked = getHasLiked(image);
                             const visibleComments = getVisibleComments(image);
@@ -426,20 +426,20 @@ export default function Gallery() {
                                         setDetailComment('');
                                         handleViewImage(image);
                                     }}
-                                    className="group w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-all text-left"
+                                    className="group w-full flex flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-left"
                                     title="Open artwork"
                                 >
-                                    <div className="relative bg-gradient-to-br from-[#D1CAF2]/25 to-[#98C4EC]/25 overflow-hidden">
+                                    <div className="relative bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20 overflow-hidden rounded-t-3xl">
                                         <img
                                             src={image.imageUrl}
                                             alt={image.title}
-                                            className="w-full h-36 sm:h-40 md:h-40 xl:h-44 object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                                            className="w-full aspect-[4/5] object-cover transition-transform duration-500 group-hover:scale-110"
                                             onError={(e) => {
                                                 e.target.style.display = 'none';
                                                 e.target.parentElement.querySelector('.fallback-icon').style.display = 'flex';
                                             }}
                                         />
-                                        <div className="fallback-icon hidden items-center justify-center h-36 sm:h-40 md:h-40 xl:h-44">
+                                        <div className="fallback-icon hidden items-center justify-center aspect-[4/5]">
                                             <Images className="w-14 h-14 text-[#D1CAF2]/50" />
                                         </div>
 
@@ -455,33 +455,33 @@ export default function Gallery() {
 
                                     </div>
 
-                                    {/* Minimal meta (gallery style) */}
-                                    <div className="px-3 py-2">
-                                        <div className="text-sm font-semibold text-[#171C3C] truncate">{image.title}</div>
-                                        <div className="mt-0.5 text-xs text-[#171C3C]/55 truncate">
+                                    {/* Elegant meta section */}
+                                    <div className="p-5 flex-1 flex flex-col justify-center">
+                                        <div className="text-lg font-bold text-[#171C3C] truncate group-hover:text-[#98C4EC] transition-colors">{image.title}</div>
+                                        <div className="mt-1 text-sm font-medium text-[#171C3C]/60 truncate">
                                             {image.artistName || image.category}
                                         </div>
                                     </div>
 
-                                    {/* Always-visible interactions */}
-                                    <div className="px-3 pb-3">
-                                        <div className="flex items-center justify-between gap-2">
+                                    {/* Interactions Footer */}
+                                    <div className="px-5 pb-5 pt-2">
+                                        <div className="flex items-center justify-between gap-2 mt-2 pt-4 border-t border-gray-50">
                                             <button
                                                 type="button"
                                                 onClick={(e) => handleLike(e, image)}
-                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FE9E8F]/10 hover:bg-[#FE9E8F]/15 transition-colors"
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FE9E8F]/10 hover:bg-[#FE9E8F]/20 hover:scale-105 transition-all"
                                                 aria-label={hasLiked ? 'Unlike' : 'Like'}
                                                 title={hasLiked ? 'Unlike' : 'Like'}
                                             >
                                                 <Heart className={`w-4 h-4 ${hasLiked ? 'fill-[#FE9E8F] text-[#FE9E8F]' : 'text-[#171C3C]/70'}`} />
-                                                <span className="text-xs font-semibold text-[#171C3C]/80">{image.likes?.length || 0}</span>
+                                                <span className="text-sm font-semibold text-[#171C3C]/80">{image.likes?.length || 0}</span>
                                             </button>
 
                                             <div
-                                                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#98C4EC]/15 transition-colors"
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#98C4EC]/15 transition-colors"
                                                 title="Comments"
                                             >
-                                                <span className="text-xs font-semibold text-[#171C3C]/80">{visibleCount} comments</span>
+                                                <span className="text-sm font-semibold text-[#171C3C]/80">{visibleCount} comments</span>
                                             </div>
                                         </div>
                                     </div>
@@ -490,142 +490,7 @@ export default function Gallery() {
                         })}
                     </div>
 
-                    {/* Detail Panel */}
-                    <aside className="hidden lg:block sticky top-24 h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-                        {selectedImage ? (
-                            <div className="h-full flex flex-col">
-                                <div className="p-5 border-b border-gray-100">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="min-w-0">
-                                            <div className="text-xl font-extrabold text-[#171C3C] truncate">{selectedImage.title}</div>
-                                            <div className="text-sm text-[#171C3C]/60 truncate">
-                                                {selectedImage.artistName ? `by ${selectedImage.artistName}` : selectedImage.category}
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsViewModalOpen(false)}
-                                            className="hidden"
-                                        />
-                                    </div>
 
-                                    <div className="mt-4 flex items-center gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => handleLike(e, selectedImage)}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#FE9E8F]/40 text-[#171C3C] hover:bg-[#FE9E8F]/10 transition-colors font-semibold"
-                                        >
-                                            <Heart className={`w-5 h-5 ${getHasLiked(selectedImage) ? 'fill-[#FE9E8F] text-[#FE9E8F]' : 'text-[#171C3C]/80'}`} />
-                                            <span>{selectedImage.likes?.length || 0}</span>
-                                        </button>
-                                        <div className="text-sm text-[#171C3C]/60 flex items-center gap-2">
-                                            <Eye className="w-4 h-4" />
-                                            {selectedImage.views || 0}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-5 overflow-y-auto flex-1">
-                                    <div className="rounded-2xl overflow-hidden bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20">
-                                        <img
-                                            src={selectedImage.imageUrl}
-                                            alt={selectedImage.title}
-                                            className="w-full max-h-64 object-cover"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                                e.target.parentElement.querySelector('.fallback-icon').style.display = 'flex';
-                                            }}
-                                        />
-                                        <div className="fallback-icon hidden items-center justify-center max-h-64 h-64">
-                                            <Images className="w-16 h-16 text-[#D1CAF2]/40" />
-                                        </div>
-                                    </div>
-
-                                    {selectedImage.description ? (
-                                        <div className="mt-4 text-sm text-[#171C3C]/75 leading-relaxed">
-                                            {selectedImage.description}
-                                        </div>
-                                    ) : null}
-
-                                    <div className="mt-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="text-sm font-bold text-[#171C3C]">Comments</div>
-                                            <div className="text-xs text-[#171C3C]/50">
-                                                {getVisibleComments(selectedImage).length}
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-3 space-y-3">
-                                            {getVisibleComments(selectedImage).length > 0 ? (
-                                                getVisibleComments(selectedImage)
-                                                    .slice(-10)
-                                                    .map((comment, idx) => (
-                                                        <div key={comment._id || idx} className="rounded-xl bg-gray-50 p-3">
-                                                            <div className="text-sm">
-                                                                <span className="font-semibold text-[#171C3C] mr-2 flex items-center gap-2">
-                                                                    {comment.userName}
-                                                                </span>
-                                                                <span className="text-[#171C3C]/80 whitespace-pre-wrap block mt-1">{comment.text}</span>
-                                                            </div>
-                                                            <div className="text-xs text-[#171C3C]/40 mt-1">
-                                                                {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}
-                                                            </div>
-                                                        </div>
-                                                    ))
-                                            ) : (
-                                                <div className="text-sm text-[#171C3C]/40 italic">No comments yet. Be the first!</div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-4 border-t border-gray-100">
-                                    {currentUser ? (
-                                        <form
-                                            onSubmit={(e) => handleComment(e, {
-                                                targetImage: selectedImage,
-                                                text: detailComment,
-                                                clearText: () => setDetailComment('')
-                                            })}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <input
-                                                type="text"
-                                                value={detailComment}
-                                                onChange={(e) => setDetailComment(e.target.value)}
-                                                placeholder="Write a comment..."
-                                                className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#98C4EC] focus:ring-2 focus:ring-[#98C4EC]/20 transition-all text-sm"
-                                                disabled={submitting}
-                                            />
-                                            <button
-                                                type="submit"
-                                                disabled={!detailComment.trim() || submitting}
-                                                className="px-5 py-3 bg-[#171C3C] text-white rounded-xl hover:bg-[#171C3C]/90 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {submitting ? 'Posting...' : 'Post'}
-                                            </button>
-                                        </form>
-                                    ) : (
-                                        <div className="bg-orange-50 text-orange-700 p-3 rounded-xl text-sm text-center">
-                                            Please log in to comment or like.
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="h-full flex items-center justify-center p-8 text-center">
-                                <div>
-                                    <div className="mx-auto w-12 h-12 rounded-2xl bg-[#D1CAF2]/25 flex items-center justify-center mb-3">
-                                        <Images className="w-6 h-6 text-[#171C3C]/70" />
-                                    </div>
-                                    <div className="font-bold text-[#171C3C]">Pick an artwork</div>
-                                    <div className="text-sm text-[#171C3C]/60 mt-1">
-                                        Click any card to view details and comments here.
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </aside>
                 </div>
             )}
 

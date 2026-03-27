@@ -38,6 +38,7 @@ const navItems = [
   { label: "ManageEvents", icon: Calendar, href: "/admin", roles: ["admin"] },
   { label: "ManageTeam", icon: Users, href: "/admin", roles: ["admin"] },
   { label: "ManageComments", icon: MessageSquare, href: "/admin", roles: ["admin"] },
+  { label: "Messages", icon: MessageSquare, href: "/messages", roles: ["admin"] },
   // { label: "Manage Blogs", icon: ImageIcon, href: "/blogs", roles: ["admin"] },
 
   { label: "MyDashboard", icon: FileText, href: "/artist", roles: ["artist"] },
@@ -47,6 +48,7 @@ const navItems = [
   { label: "MyOrders", icon: ShoppingBag, href: "/artist", roles: ["artist"] },
   // { label: "My Blogs", icon: Box, href: "/artist", roles: ["artist"] },
   { label: "MyPortfolio", icon: ImageIcon, href: "/artist", roles: ["artist"] },
+  { label: "Messages", icon: MessageSquare, href: "/messages", roles: ["artist"] },
 ];
 
 export default function Sidebar({ role = "user", onNavigate }) {

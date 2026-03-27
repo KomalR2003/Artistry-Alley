@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Sparkles } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -152,8 +152,12 @@ export default function Login() {
             {/* Row 4 - Full width */}
             <div className="col-span-2 relative rounded-2xl overflow-hidden bg-[#98C4EC] flex items-center justify-center p-6 hover:bg-opacity-90 transition-all">
               <div className="text-center w-full">
-                <div className="text-3xl font-bold text-slate-500 tracking-wider">
-                  EXPLORE <span className="text-slate-600">â€¢</span> CONNECT <span className="text-slate-600">â€¢</span> COLLECT
+                <div className="text-3xl font-bold text-slate-500 tracking-wider flex items-center justify-center gap-3">
+                  <span>EXPLORE</span>
+                  <Sparkles className="w-5 h-5 text-[#FE9E8F]" />
+                  <span>CONNECT</span>
+                  <Sparkles className="w-5 h-5 text-[#FE9E8F]" />
+                  <span>COLLECT</span>
                 </div>
                 <div className="text-sm font-medium text-slate-600 mt-2">
                   The Art Gallery Experience

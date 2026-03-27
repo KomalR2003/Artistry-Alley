@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
@@ -10,6 +10,7 @@ import MyEvents from "../../components/Artist/MyEvents";
 import MyGallery from "../../components/Artist/MyGallery";
 import MyPortfolio from "../../components/Artist/MyPortfolio";
 import MyOrders from "../../components/Artist/MyOrders";
+import MessageDashboard from "../../components/Messages/MessageDashboard";
 
 const ArtistPage = () => {
     const router = useRouter();
@@ -43,6 +44,7 @@ const ArtistPage = () => {
             case "MyGallery": return <MyGallery />;
             case "MyPortfolio": return <MyPortfolio />;
             case "MyOrders": return <MyOrders />;
+            case "Messages": return <MessageDashboard />;
             default: return <MyDashboard />;
         }
     }

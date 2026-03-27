@@ -10,6 +10,7 @@ import ManageGallery from "../../components/Admin/ManageGallery";
 import ManageProducts from "../../components/Admin/ManageProducts";
 import ManageTeam from "../../components/Admin/ManageTeam";
 import ManageComments from "../../components/Admin/ManageComments";
+import MessageDashboard from "../../components/Messages/MessageDashboard";
 
 export default function AdminPage() {
     const router = useRouter();
@@ -43,6 +44,7 @@ export default function AdminPage() {
             case "ManageProducts": return <ManageProducts />;
             case "ManageTeam": return <ManageTeam />;
             case "ManageComments": return <ManageComments />;
+            case "Messages": return <MessageDashboard />;
             default: return <AdminDashboard />;
         }
     };
