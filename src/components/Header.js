@@ -210,7 +210,7 @@ export default function Header() {
               {isNotificationsOpen && (
                   <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-[100] animate-in slide-in-from-top-2 duration-200">
                       <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                          <h3 className="font-bold text-gray-800">Notifications</h3>
+                          <h3 className="font-semibold text-gray-800">Notifications</h3>
                           {unreadNotifications > 0 && (
                               <button onClick={markAllAsRead} className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition-colors">
                                   <CheckCheck size={14} /> Mark all read

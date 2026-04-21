@@ -86,14 +86,14 @@ export default function Home({ onNavigate }) {
                         </div>
 
                         {/* Main Heading */}
-                        <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                            <span className="bg-gradient-to-r from-[#171C3C] via-[#2a3154] to-[#171C3C] bg-clip-text text-transparent">
+                        <h1 className="text-2xl md:text-6xl font-semibold leading-tight">
+                            <span className="text-[#171C3C]">
                                 Step into
                             </span>
                             <br />
                             <span className="text-gray-700">creativity, where</span>
                             <br />
-                            <span className="bg-gradient-to-r from-[#98C4EC] via-[#FE9E8F] to-[#D1CAF2] bg-clip-text text-transparent">
+                            <span className="text-[#171C3C]">
                                 Art comes alive
                             </span>
                         </h1>
@@ -165,7 +165,7 @@ export default function Home({ onNavigate }) {
                         <div className="w-14 h-14 rounded-2xl bg-[#98C4EC] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <Palette className="text-white" size={28} />
                         </div>
-                        <h4 className="text-xl font-bold text-[#171C3C] mb-3">Discover Art</h4>
+                        <h4 className="text-xl font-semibold text-[#171C3C] mb-3">Discover Art</h4>
                         <p className="text-gray-600">Browse through thousands of curated artworks from talented artists worldwide.</p>
                     </div>
 
@@ -173,7 +173,7 @@ export default function Home({ onNavigate }) {
                         <div className="w-14 h-14 rounded-2xl bg-[#FE9E8F] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <Users className="text-white" size={28} />
                         </div>
-                        <h4 className="text-xl font-bold text-[#171C3C] mb-3">Connect Artists</h4>
+                        <h4 className="text-xl font-semibold text-[#171C3C] mb-3">Connect Artists</h4>
                         <p className="text-gray-600">Join a vibrant community of artists, collectors, and art enthusiasts.</p>
                     </div>
 
@@ -181,7 +181,7 @@ export default function Home({ onNavigate }) {
                         <div className="w-14 h-14 rounded-2xl bg-[#D1CAF2] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <Heart className="text-white" size={28} />
                         </div>
-                        <h4 className="text-xl font-bold text-[#171C3C] mb-3">Collect & Own</h4>
+                        <h4 className="text-xl font-semibold text-[#171C3C] mb-3">Collect & Own</h4>
                         <p className="text-gray-600">Build your personal collection of unique artworks and support artists.</p>
                     </div>
                 </div>

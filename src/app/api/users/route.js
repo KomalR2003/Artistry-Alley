@@ -12,13 +12,17 @@ export async function GET(request) {
 
         let query = {};
         if (role) {
-            query.role = role;
+            if (role.includes(',')) {
+                query.role = { $in: role.split(',') };
+            } else {
+                query.role = role;
+            }
         }
         if (excludeId) {
             query._id = { $ne: excludeId };
         }
 
-        const users = await UserModel.find(query).select('_id username role profilePicture email').sort({ username: 1 });
+        const users = await UserModel.find(query).select('_id username role profilePicture email experience specialization bio').sort({ username: 1 });
 
         return NextResponse.json({
             success: true,

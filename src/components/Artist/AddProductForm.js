@@ -264,7 +264,7 @@ const AddProductForm = ({ isOpen, onClose, onProductAdded, artistId, artistName 
             <div className="bg-white rounded-2xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center rounded-t-2xl">
-                    <h2 className="text-2xl font-bold text-[#171C3C]">Add New Product</h2>
+                    <h2 className="text-2xl font-semibold text-[#171C3C]">Add New Product</h2>
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

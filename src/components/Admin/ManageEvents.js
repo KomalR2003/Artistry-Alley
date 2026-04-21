@@ -100,7 +100,7 @@ const ManageEvents = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-black border-none">
+          <h1 className="text-2xl font-semibold text-black border-none">
             Manage Events
           </h1>
           <p className="text-[#171C3C]/70 mt-1">
@@ -128,7 +128,7 @@ const ManageEvents = () => {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         <div className="flex flex-col transition-shadow">
-          <h3 className="text-lg font-bold text-[#171C3C] mb-4">Events Overview</h3>
+          <h3 className="text-lg font-semibold text-[#171C3C] mb-4">Events Overview</h3>
           <div className="flex items-center gap-4">
             <div className="w-2 h-14 rounded-l-full bg-[#FE9E8F] shrink-0"></div>
             <div className="flex gap-6 w-full">
@@ -145,7 +145,7 @@ const ManageEvents = () => {
         </div>
 
         <div className="flex flex-col transition-shadow">
-          <h3 className="text-lg font-bold text-[#171C3C] mb-4">Schedule Tracker</h3>
+          <h3 className="text-lg font-semibold text-[#171C3C] mb-4">Schedule Tracker</h3>
           <div className="flex items-center gap-4">
             <div className="w-2 h-14 rounded-l-full bg-[#98C4EC] shrink-0"></div>
             <div className="flex gap-6 w-full">
@@ -203,7 +203,7 @@ const ManageEvents = () => {
                             <Calendar className="w-5 h-5 text-slate-300" />
                           )}
                         </div>
-                        <h4 className="font-bold text-black text-sm group-hover:text-[#98C4EC] transition-colors line-clamp-2 max-w-[200px]">
+                        <h4 className="font-semibold text-black text-sm group-hover:text-[#98C4EC] transition-colors line-clamp-2 max-w-[200px]">
                           {event.title}
                         </h4>
                       </div>

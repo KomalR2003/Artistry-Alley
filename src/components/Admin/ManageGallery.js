@@ -96,7 +96,7 @@ const ManageGallery = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-black border-none">
+          <h1 className="text-2xl font-semibold text-black border-none">
             Manage Gallery
           </h1>
           <p className="text-[#171C3C]/70 mt-1">
@@ -122,7 +122,7 @@ const ManageGallery = () => {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         <div className="flex flex-col transition-shadow">
-          <h3 className="text-lg font-bold text-[#171C3C] mb-4">Gallery Overview</h3>
+          <h3 className="text-lg font-semibold text-[#171C3C] mb-4">Gallery Overview</h3>
           <div className="flex items-center gap-4">
             <div className="w-2 h-14 rounded-l-full bg-[#4ADE80] shrink-0"></div>
             <div className="flex gap-6 w-full">
@@ -139,7 +139,7 @@ const ManageGallery = () => {
         </div>
 
         <div className="flex flex-col transition-shadow">
-          <h3 className="text-lg font-bold text-[#171C3C] mb-4">Community Reach</h3>
+          <h3 className="text-lg font-semibold text-[#171C3C] mb-4">Community Reach</h3>
           <div className="flex items-center gap-4">
             <div className="w-2 h-14 rounded-l-full bg-[#FE9E8F] shrink-0"></div>
             <div className="flex gap-6 w-full">
@@ -191,7 +191,7 @@ const ManageGallery = () => {
                       </div>
                     </td>
                     <td className="p-5">
-                      <h4 className="font-bold text-black text-base mb-1">{item.title || 'Untitled Masterpiece'}</h4>
+                      <h4 className="font-semibold text-black text-base mb-1">{item.title || 'Untitled Masterpiece'}</h4>
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 rounded-full overflow-hidden bg-[#D1CAF2]">
                           {item.artistId?.profilePicture ? (
@@ -358,7 +358,7 @@ const ManageGallery = () => {
             <div className="w-full md:w-1/2 flex flex-col md:h-auto max-h-[90vh] bg-white border-l border-[#D1CAF2]/30">
               <div className="p-8 flex flex-col h-full overflow-y-auto custom-scrollbar">
                 <div className="mb-6 shrink-0">
-                  <h2 className="text-3xl font-black text-[#171C3C] mb-2 tracking-tight">
+                  <h2 className="text-2xl font-black text-[#171C3C] mb-2 tracking-tight">
                     {viewedItem.title} <span className="text-sm font-medium text-black/50 ml-2">by {viewedItem.artistId?.username || viewedItem.artistId?.name || 'Unknown'}</span>
                   </h2>
                   <div className="flex items-center gap-4 text-sm text-[#171C3C]/60 font-medium">
@@ -378,7 +378,7 @@ const ManageGallery = () => {
 
                   {/* Comments Panel */}
                   <div className="flex-1 flex flex-col">
-                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
+                    <h3 className="text-sm font-semibold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <MessageSquare className="w-4 h-4 text-[#98C4EC]" />
                       Comments ({viewedItem.comments?.length || 0})
                     </h3>
@@ -388,7 +388,7 @@ const ManageGallery = () => {
                       ) : (
                         viewedItem.comments.map((comment, index) => (
                           <div key={comment._id || index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30 shrink-0">
-                            <h4 className="font-bold text-[#171C3C] text-xs mb-1">{comment.userName || 'Anonymous'}</h4>
+                            <h4 className="font-semibold text-[#171C3C] text-xs mb-1">{comment.userName || 'Anonymous'}</h4>
                             <p className="text-sm text-[#171C3C]/70">{comment.text}</p>
                             {/* Admin badge for hidden comments */}
                             {comment.status === 'hidden' && (
@@ -404,7 +404,7 @@ const ManageGallery = () => {
 
                   {/* Likes Panel */}
                   <div className="flex-1 flex flex-col border-l border-[#D1CAF2]/40 pl-6">
-                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
+                    <h3 className="text-sm font-semibold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <Heart className="w-4 h-4 fill-[#FE9E8F] text-[#FE9E8F]" />
                       Likes ({viewedItem.likes?.length || 0})
                     </h3>

@@ -125,7 +125,7 @@ const MyOrders = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-[#171C3C] mb-2">My Orders</h1>
+                    <h1 className="text-2xl font-semibold text-[#171C3C] mb-2">My Orders</h1>
                     <p className="text-gray-600">Manage orders for your products</p>
                 </div>
 
@@ -178,7 +178,7 @@ const MyOrders = () => {
                                 <div className="bg-gradient-to-r from-[#FE9E8F]/10 to-[#D1CAF2]/10 px-6 py-4 border-b border-gray-200">
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <h3 className="text-lg font-bold text-[#171C3C]">
+                                            <h3 className="text-lg font-semibold text-[#171C3C]">
                                                 Order #{order.orderId}
                                             </h3>
                                             <p className="text-sm text-gray-600">

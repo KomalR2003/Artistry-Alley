@@ -59,7 +59,7 @@ export default function ManageComments() {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-3">
+                    <h1 className="text-2xl font-semibold flex items-center gap-3">
                         <ShieldAlert className="w-8 h-8 text-[#E57A6B]" />
                         Moderation Queue
                     </h1>
@@ -93,7 +93,7 @@ export default function ManageComments() {
                         <div className="w-20 h-20 bg-[#f0f9ff] rounded-full flex items-center justify-center mb-4">
                             <CheckCircle className="w-10 h-10 text-[#4ADE80]" />
                         </div>
-                        <h3 className="text-xl font-bold text-[#171C3C]">All Caught Up!</h3>
+                        <h3 className="text-xl font-semibold text-[#171C3C]">All Caught Up!</h3>
                         <p className="mt-2 text-sm">No comments require moderation currently.</p>
                     </div>
                 ) : (

@@ -106,7 +106,7 @@ const MyOrders = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-[#171C3C] mb-2">My Orders</h1>
+                    <h1 className="text-2xl font-semibold text-[#171C3C] mb-2">My Orders</h1>
                     <p className="text-gray-600">Track and manage your orders</p>
                 </div>
 
@@ -148,7 +148,7 @@ const MyOrders = () => {
                                 <div className="bg-gradient-to-r from-[#FE9E8F]/10 via-[#D1CAF2]/10 to-[#98C4EC]/10 px-6 py-5 border-b border-gray-100">
                                     <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                                         <div>
-                                            <h3 className="text-xl font-bold text-[#171C3C] mb-1">
+                                            <h3 className="text-xl font-semibold text-[#171C3C] mb-1">
                                                 Order #{order.orderId?.slice(-8)}
                                             </h3>
                                             <p className="text-sm text-gray-600">
@@ -197,7 +197,7 @@ const MyOrders = () => {
                                                     />
                                                 )}
                                                 <div className="flex-1">
-                                                    <h5 className="font-bold text-[#171C3C] text-lg mb-1">{item.productname}</h5>
+                                                    <h5 className="font-semibold text-[#171C3C] text-lg mb-1">{item.productname}</h5>
                                                     <p className="text-sm text-gray-600 mb-2">
                                                         by <span className="font-medium text-[#FE9E8F]">{item.artistName}</span>
                                                     </p>

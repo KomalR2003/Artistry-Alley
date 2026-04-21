@@ -36,7 +36,7 @@ export default function LogoutModal({ isOpen, onClose, onConfirm }) {
 
                     {/* Content */}
                     <div className="text-center mb-8">
-                        <h2 className="text-2xl font-bold text-[#171C3C] mb-3">
+                        <h2 className="text-2xl font-semibold text-[#171C3C] mb-3">
                             Confirm Logout
                         </h2>
                         <p className="text-gray-600 text-lg">

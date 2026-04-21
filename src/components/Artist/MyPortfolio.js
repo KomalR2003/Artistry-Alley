@@ -148,7 +148,7 @@ const MyPortfolio = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#171C3C] via-[#D1CAF2] to-[#FE9E8F]">
+          <h1 className="text-2xl font-semibold text-[#171C3C]">
             My Portfolio
           </h1>
           <p className="text-[#171C3C]/70 mt-2">
@@ -221,7 +221,7 @@ const MyPortfolio = () => {
 
           {!isEditing ? (
             <>
-              <h2 className="text-2xl font-bold text-[#171C3C] mb-1">{profile?.username || 'Artist Name'}</h2>
+              <h2 className="text-2xl font-semibold text-[#171C3C] mb-1">{profile?.username || 'Artist Name'}</h2>
               <span className="inline-block px-3 py-1 bg-white border border-[#D1CAF2]/40 text-[#171C3C]/70 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
                 {profile?.specialization || 'Artist'}
               </span>
@@ -266,7 +266,7 @@ const MyPortfolio = () => {
         {/* Right Col: Biography */}
         <div className="lg:col-span-2 flex flex-col gap-8">
           <div className="border border-[#98C4EC]/30 rounded-2xl p-8 bg-[#98C4EC]/5 shadow-sm h-full flex flex-col">
-            <h3 className="text-xl font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+            <h3 className="text-xl font-semibold text-[#171C3C] mb-4 flex items-center gap-2">
               Biography
             </h3>
 

@@ -1,4 +1,4 @@
-﻿
+
 import nodemailer from 'nodemailer';
 
 // Create reusable email transporter
@@ -202,22 +202,21 @@ const getWelcomeEmailTemplate = (username, role) => {
     <body>
         <div class="email-container">
             <div class="header">
-                <span class="emoji-large">ðŸŽ¨</span>
                 <h1>Welcome to Artistry!</h1>
             </div>
             
             <div class="content">
                 <div style="text-align: center;">
-                    <span class="welcome-badge">${isArtist ? 'ðŸŽ¨ ARTIST ACCOUNT' : 'ðŸ‘¤ USER ACCOUNT'}</span>
+                    <span class="welcome-badge">${isArtist ? 'ARTIST ACCOUNT' : 'USER ACCOUNT'}</span>
                 </div>
                 
-                <p class="greeting">Hello ${username}! ðŸ‘‹</p>
+                <p class="greeting">Hello ${username}!</p>
                 <p class="intro-text">We're absolutely thrilled to welcome you to <strong>Artistry</strong> - your creative digital space where art comes alive! Get ready to ${isArtist ? 'showcase your amazing talent' : 'discover incredible artworks'} and connect with a vibrant community of art lovers.</p>
                 
                 <div class="info-card">
                     <div class="info-row">
                         <span class="info-label">Account Type:</span>
-                        <span class="info-value">${isArtist ? 'ðŸŽ¨ Artist' : 'ðŸ‘¤ User'}</span>
+                        <span class="info-value">${isArtist ? 'Artist' : 'User'}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Username:</span>
@@ -232,7 +231,7 @@ const getWelcomeEmailTemplate = (username, role) => {
                 <div class="features-grid">
                     ${isArtist ? `
                     <div class="feature-item">
-                        <div class="feature-icon">ðŸ“¸</div>
+                        <div class="feature-icon">1</div>
                         <div>Upload & manage your stunning artwork gallery</div>
                     </div>
                     <div class="feature-item">
@@ -240,7 +239,7 @@ const getWelcomeEmailTemplate = (username, role) => {
                         <div>List your products and reach art collectors</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">ðŸ“Š</div>
+                        <div class="feature-icon">3</div>
                         <div>Track views, likes & engagement stats</div>
                     </div>
                     <div class="feature-item">
@@ -248,7 +247,7 @@ const getWelcomeEmailTemplate = (username, role) => {
                         <div>Connect with art enthusiasts worldwide</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">âœ¨</div>
+                        <div class="feature-icon">5</div>
                         <div>Build your professional artist profile</div>
                     </div>
                     ` : `
@@ -257,7 +256,7 @@ const getWelcomeEmailTemplate = (username, role) => {
                         <div>Browse stunning artworks from talented artists</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">ðŸ›’</div>
+                        <div class="feature-icon">2</div>
                         <div>Discover & purchase unique art pieces</div>
                     </div>
                     <div class="feature-item">
@@ -269,7 +268,7 @@ const getWelcomeEmailTemplate = (username, role) => {
                         <div>Follow and support your favorite artists</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">ðŸŽ­</div>
+                        <div class="feature-icon">5</div>
                         <div>Explore curated collections & exhibitions</div>
                     </div>
                     `}
@@ -285,7 +284,7 @@ const getWelcomeEmailTemplate = (username, role) => {
                 </p>
                 
                 <p style="margin-top: 30px; color: #171C3C; font-size: 16px; font-weight: 600;">
-                    Happy ${isArtist ? 'Creating' : 'Exploring'}! ðŸŽ¨âœ¨<br>
+                    Happy ${isArtist ? 'Creating' : 'Exploring'}!<br>
                     <span style="font-weight: 400; font-size: 14px; color: #666;">The Artistry Team</span>
                 </p>
             </div>
@@ -405,7 +404,7 @@ const getLoginNotificationTemplate = (username, loginTime) => {
                 align-items: center;
             }
             .login-card h3::before {
-                content: 'âœ“';
+                content: '';
                 background: linear-gradient(135deg, #98C4EC 0%, #D1CAF2 100%);
                 color: white;
                 width: 30px;
@@ -469,7 +468,7 @@ const getLoginNotificationTemplate = (username, loginTime) => {
                 align-items: center;
             }
             .tip-box-title::before {
-                content: 'ðŸ’¡';
+                content: '!';
                 margin-right: 8px;
                 font-size: 18px;
             }
@@ -512,13 +511,12 @@ const getLoginNotificationTemplate = (username, loginTime) => {
     <body>
         <div class="email-container">
             <div class="header">
-                <span class="emoji-large">ðŸ‘‹</span>
                 <h1>Welcome Back!</h1>
             </div>
             
             <div class="content">
                 <div style="text-align: center;">
-                    <span class="success-badge">âœ“ SUCCESSFUL LOGIN</span>
+                    <span class="success-badge">SUCCESSFUL LOGIN</span>
                 </div>
                 
                 <p class="greeting">Hey ${username}!</p>
@@ -527,7 +525,7 @@ const getLoginNotificationTemplate = (username, loginTime) => {
                 <div class="login-card">
                     <h3>Login Activity</h3>
                     <div class="detail-item">
-                        <div class="detail-icon">ðŸ“…</div>
+                        <div class="detail-icon">-</div>
                         <div class="detail-content">
                             <div class="detail-label">Date & Time</div>
                             <div class="detail-value">${loginTime}</div>
@@ -665,11 +663,6 @@ const getOrderConfirmationTemplate = (order) => {
                 font-weight: 700;
                 text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
             }
-            .emoji-large {
-                font-size: 60px;
-                margin-bottom: 15px;
-                display: block;
-            }
             .content {
                 padding: 40px 35px;
             }
@@ -758,16 +751,15 @@ const getOrderConfirmationTemplate = (order) => {
     <body>
         <div class="email-container">
             <div class="header">
-                <span class="emoji-large">ðŸŽ‰</span>
                 <h1>Order Confirmed!</h1>
             </div>
             
             <div class="content">
                 <div style="text-align: center;">
-                    <span class="order-badge">âœ“ ORDER PLACED</span>
+                    <span class="order-badge">SUCCESS: ORDER PLACED</span>
                 </div>
                 
-                <p class="greeting">Hi ${order.customer.name}! ðŸ‘‹</p>
+                <p class="greeting">Hi ${order.customer.name}!</p>
                 <p style="color: #666; margin-bottom: 20px;">
                     Thank you for your purchase at Artistry Gallery! Your order has been successfully placed.
                 </p>
@@ -784,7 +776,7 @@ const getOrderConfirmationTemplate = (order) => {
                     </div>
                     <div class="order-info">
                         <span class="label">Payment Status:</span>
-                        <span class="value" style="color: #4CAF50;">âœ“ Paid</span>
+                        <span class="value" style="color: #4CAF50;">✅ Paid</span>
                     </div>
                 </div>
                 
@@ -815,7 +807,7 @@ const getOrderConfirmationTemplate = (order) => {
             
             <div class="footer">
                 <div style="margin-bottom: 15px; color: #171C3C; font-weight: 600;">Artistry - Where Art Meets Passion</div>
-                <p>Â© 2026 Artistry. All rights reserved.</p>
+                <p>© 2026 Artistry. All rights reserved.</p>
             </div>
         </div>
     </body>
@@ -924,17 +916,16 @@ const getArtistOrderAlertTemplate = (order, item) => {
     <body>
         <div class="email-container">
             <div class="header">
-                <span style="font-size: 60px; display: block; margin-bottom: 15px;">ðŸ›ï¸</span>
                 <h1>New Order!</h1>
             </div>
             
             <div class="content">
                 <div style="text-align: center;">
-                    <span class="badge">ðŸŽ¨ NEW ORDER RECEIVED</span>
+                    <span class="badge">NEW ORDER RECEIVED</span>
                 </div>
                 
                 <p style="font-size: 24px; color: #171C3C; margin: 20px 0; font-weight: 600;">
-                    Great news, ${item.artistName}! ðŸŽ‰
+                    Great news, ${item.artistName}!
                 </p>
                 <p style="color: #666; margin-bottom: 25px;">
                     You have a new order for your artwork. A customer has purchased your creation!
@@ -990,13 +981,13 @@ const getArtistOrderAlertTemplate = (order, item) => {
                 </div>
                 
                 <p style="margin-top: 30px; color: #666; font-size: 15px; text-align: center;">
-                    Congratulations on your sale! Keep creating amazing art! ðŸŽ¨
+                    Congratulations on your sale! Keep creating amazing art!
                 </p>
             </div>
             
             <div class="footer">
                 <div style="margin-bottom: 15px; color: #171C3C; font-weight: 600;">Artistry - Where Art Meets Passion</div>
-                <p>Â© 2026 Artistry. All rights reserved.</p>
+                <p>© 2026 Artistry. All rights reserved.</p>
             </div>
         </div>
     </body>
@@ -1080,17 +1071,16 @@ const getOrderConfirmedByArtistTemplate = (order, item) => {
     <body>
         <div class="email-container">
             <div class="header">
-                <span style="font-size: 60px; display: block; margin-bottom: 15px;">âœ…</span>
                 <h1>Order Confirmed!</h1>
             </div>
             
             <div class="content">
                 <div style="text-align: center;">
-                    <span class="badge">âœ“ ARTIST CONFIRMED</span>
+                    <span class="badge">✅ ARTIST CONFIRMED</span>
                 </div>
                 
                 <p style="font-size: 24px; color: #171C3C; margin: 20px 0; font-weight: 600;">
-                    Great news, ${order.customer.name}! ðŸŽ‰
+                    Great news, ${order.customer.name}!
                 </p>
                 <p style="color: #666; margin-bottom: 25px;">
                     The artist has confirmed your order! Your artwork is now being prepared for delivery.
@@ -1116,20 +1106,20 @@ const getOrderConfirmedByArtistTemplate = (order, item) => {
                     </div>
                     <div class="info-row">
                         <span class="label">Status:</span>
-                        <span class="value" style="color: #4CAF50;">âœ“ Confirmed & Being Prepared</span>
+                        <span class="value" style="color: #4CAF50;">✅ Confirmed & Being Prepared</span>
                     </div>
                 </div>
                 
 
                 
                 <p style="margin-top: 30px; color: #666; font-size: 15px; text-align: center;">
-                    Thank you for supporting artists on Artistry! ðŸŽ¨
+                    Thank you for supporting artists on Artistry! 🎨
                 </p>
             </div>
             
             <div class="footer">
                 <div style="margin-bottom: 15px; color: #171C3C; font-weight: 600;">Artistry - Where Art Meets Passion</div>
-                <p>Â© 2026 Artistry. All rights reserved.</p>
+                <p>© 2026 Artistry. All rights reserved.</p>
             </div>
         </div>
     </body>
@@ -1150,11 +1140,9 @@ export const sendOrderConfirmationEmail = async (order) => {
         const mailOptions = {
             from: process.env.EMAIL_FROM || `"Artistry" <${process.env.EMAIL_USER}>`,
             to: order.customer.email,
-            subject: `ðŸŽ¨ Order Confirmed - Artistry Gallery #${order.orderId}`,
+            subject: `Order Confirmed - Artistry Art Gallery #${order.orderId}`,
             html: getOrderConfirmationTemplate(order),
         };
-
-        console.log("Mail Options:", { from: mailOptions.from, to: mailOptions.to, subject: mailOptions.subject });
 
         const info = await transporter.sendMail(mailOptions);
         console.log('Order confirmation email sent successfully:', info.messageId);
@@ -1180,7 +1168,7 @@ export const sendArtistOrderAlertEmail = async (order, item) => {
         const mailOptions = {
             from: process.env.EMAIL_FROM || `"Artistry" <${process.env.EMAIL_USER}>`,
             to: item.artistEmail,
-            subject: `ðŸ›ï¸ New Order for Your Artwork - ${item.productname}`,
+            subject: `New Order for Your Artwork - ${item.productname}`,
             html: getArtistOrderAlertTemplate(order, item),
         };
 
@@ -1203,7 +1191,7 @@ export const sendOrderConfirmedByArtistEmail = async (order, item) => {
         const mailOptions = {
             from: process.env.EMAIL_FROM || `"Artistry" <${process.env.EMAIL_USER}>`,
             to: order.customer.email,
-            subject: `âœ… Order Confirmed by Artist - ${item.productname}`,
+            subject: `Order Confirmed by Artist - ${item.productname}`,
             html: getOrderConfirmedByArtistTemplate(order, item),
         };
 

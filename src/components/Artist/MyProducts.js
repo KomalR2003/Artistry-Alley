@@ -140,7 +140,7 @@ const MyProducts = () => {
       {/* Header */}
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-[#171C3C]">
+          <h1 className="text-2xl font-semibold text-[#171C3C]">
             My Products
           </h1>
           <p className="text-[#171C3C]/70 mt-2">
@@ -207,7 +207,7 @@ const MyProducts = () => {
       ) : products.length === 0 ? (
         <div className="bg-[#98C4EC]/10 rounded-2xl border border-[#98C4EC]/40 p-12 text-center">
           <ShoppingBag className="w-16 h-16 text-[#98C4EC] mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[#171C3C] mb-2">No Products Found</h2>
+          <h2 className="text-2xl font-semibold text-[#171C3C] mb-2">No Products Found</h2>
           <p className="text-[#171C3C]/60 mb-6">Start by adding your first product</p>
           <button
             onClick={() => setIsAddModalOpen(true)}
@@ -254,7 +254,7 @@ const MyProducts = () => {
               {/* Product Details */}
               <div className="p-4">
                 <div className="mb-3">
-                  <h3 className="font-bold text-[#171C3C] text-lg mb-1 truncate">
+                  <h3 className="font-semibold text-[#171C3C] text-lg mb-1 truncate">
                     {product.productname}
                   </h3>
                   <p className="text-sm text-[#171C3C]/60">{product.category}</p>

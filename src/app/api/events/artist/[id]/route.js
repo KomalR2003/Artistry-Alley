@@ -19,9 +19,13 @@ export async function PUT(req, { params }) {
             body.price = 0;
         } else {
             // Ensure price is a number for paid events
-            if (body.price) {
+            if (body.price !== undefined) {
                 body.price = Number(body.price);
             }
+        }
+        
+        if (body.capacity !== undefined) {
+            body.capacity = Number(body.capacity);
         }
 
         const updatedEvent = await Event.findByIdAndUpdate(

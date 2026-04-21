@@ -139,7 +139,7 @@ const MyGallery = () => {
       {/* Header */}
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-[#171C3C]">
+          <h1 className="text-2xl font-semibold text-[#171C3C]">
             My Gallery
           </h1>
           <p className="text-[#171C3C]/70 mt-2">
@@ -218,7 +218,7 @@ const MyGallery = () => {
       ) : images.length === 0 ? (
         <div className="bg-[#D1CAF2]/10 rounded-2xl border border-[#D1CAF2]/40 p-12 text-center">
           <Images className="w-16 h-16 text-[#D1CAF2] mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[#171C3C] mb-2">No Images Found</h2>
+          <h2 className="text-2xl font-semibold text-[#171C3C] mb-2">No Images Found</h2>
           <p className="text-[#171C3C]/60 mb-6">Start by uploading your first artwork</p>
           <button
             onClick={() => setIsAddModalOpen(true)}
@@ -264,7 +264,7 @@ const MyGallery = () => {
               {/* Image Details */}
               <div className="p-4">
                 <div className="mb-3">
-                  <h3 className="font-bold text-[#171C3C] text-lg mb-1 truncate">
+                  <h3 className="font-semibold text-[#171C3C] text-lg mb-1 truncate">
                     {image.title}
                   </h3>
                   <p className="text-sm text-[#171C3C]/60">{image.category}</p>
@@ -372,7 +372,7 @@ const MyGallery = () => {
             <div className="w-full md:w-1/2 flex flex-col md:h-auto max-h-[90vh] bg-white border-l border-[#D1CAF2]/30">
               <div className="p-8 flex flex-col h-full overflow-y-auto custom-scrollbar">
                 <div className="mb-6 shrink-0">
-                  <h2 className="text-3xl font-black text-[#171C3C] mb-2 tracking-tight">
+                  <h2 className="text-2xl font-black text-[#171C3C] mb-2 tracking-tight">
                     {viewedImage.title}
                   </h2>
                   <div className="flex items-center gap-4 text-sm text-[#171C3C]/60 font-medium">
@@ -392,7 +392,7 @@ const MyGallery = () => {
 
                   {/* Comments Panel */}
                   <div className="flex-1 flex flex-col">
-                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
+                    <h3 className="text-sm font-semibold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <MessageSquare className="w-4 h-4 text-[#98C4EC]" />
                       Comments ({viewedImage.comments?.length || 0})
                     </h3>
@@ -403,7 +403,7 @@ const MyGallery = () => {
                         viewedImage.comments.map((comment, index) => (
                           <div key={comment._id || index} className="bg-[#FAFAFA] p-3 rounded-xl border border-[#D1CAF2]/30 shrink-0">
                             <div className="flex justify-between items-start mb-1">
-                                <h4 className="font-bold text-[#171C3C] text-xs">{comment.userName || 'Anonymous'}</h4>
+                                <h4 className="font-semibold text-[#171C3C] text-xs">{comment.userName || 'Anonymous'}</h4>
                             </div>
                             <p className="text-sm text-[#171C3C]/70">{comment.text}</p>
                           </div>
@@ -414,7 +414,7 @@ const MyGallery = () => {
 
                   {/* Likes Panel */}
                   <div className="flex-1 flex flex-col border-l border-[#D1CAF2]/40 pl-6">
-                    <h3 className="text-sm font-bold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
+                    <h3 className="text-sm font-semibold text-[#171C3C] mb-4 flex items-center gap-2 shrink-0">
                       <Heart className="w-4 h-4 fill-[#FE9E8F] text-[#FE9E8F]" />
                       Likes ({viewedImage.likes?.length || 0})
                     </h3>

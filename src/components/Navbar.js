@@ -29,7 +29,7 @@ const navLinks = [
     { label: "Events", href: "/home" },
     { label: "Our Team", href: "/home" },
     { label: "Dashboard", href: "/home" },
-    { label: "Contact Us", href: "/contact" },
+    { label: "Contact Us", href: "/home" },
     { label: "Messages", href: "/messages" },
 ];
 

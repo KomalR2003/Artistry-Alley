@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Eye, EyeOff, Sparkles } from "lucide-react";
@@ -152,7 +152,7 @@ export default function Login() {
             {/* Row 4 - Full width */}
             <div className="col-span-2 relative rounded-2xl overflow-hidden bg-[#98C4EC] flex items-center justify-center p-6 hover:bg-opacity-90 transition-all">
               <div className="text-center w-full">
-                <div className="text-3xl font-bold text-slate-500 tracking-wider flex items-center justify-center gap-3">
+                <div className="text-2xl font-bold text-slate-500 tracking-wider flex items-center justify-center gap-3">
                   <span>EXPLORE</span>
                   <Sparkles className="w-5 h-5 text-[#FE9E8F]" />
                   <span>CONNECT</span>
@@ -200,7 +200,7 @@ export default function Login() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#171C3C] mb-2">
+            <h1 className="text-2xl font-semibold text-[#171C3C] mb-2">
               Welcome to <span className="text-[#98C4EC]">Artistry Alley</span>
             </h1>
             <p className="text-gray-700 text-sm">

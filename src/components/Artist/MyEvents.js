@@ -24,7 +24,8 @@ export default function MyEvents() {
     isFree: true,
     isMultiDay: true,
     price: '',
-    image: ''
+    image: '',
+    capacity: 100
   });
 
   useEffect(() => {
@@ -109,7 +110,8 @@ export default function MyEvents() {
         isFree: event.isFree,
         isMultiDay: event.startDate !== event.endDate,
         price: event.price || '',
-        image: event.image || ''
+        image: event.image || '',
+        capacity: event.capacity || 100
       });
     } else {
       // Add mode
@@ -126,7 +128,8 @@ export default function MyEvents() {
         isFree: true,
         isMultiDay: true,
         price: '',
-        image: ''
+        image: '',
+        capacity: 100
       });
     }
     setIsModalOpen(true);
@@ -241,7 +244,7 @@ export default function MyEvents() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-[#171C3C]">My Events & Exhibitions</h1>
+            <h1 className="text-2xl font-semibold text-[#171C3C]">My Events & Exhibitions</h1>
             <p className="text-gray-500 mt-1">Manage all your upcoming and past events</p>
           </div>
           <div className="flex gap-4">
@@ -285,7 +288,7 @@ export default function MyEvents() {
               <div className="w-24 h-24 bg-gradient-to-br from-[#FE9E8F]/20 to-[#D1CAF2]/20 rounded-full flex items-center justify-center mb-6">
                 <Users className="w-12 h-12 text-[#171C3C]/60" />
               </div>
-              <h2 className="text-2xl font-bold text-[#171C3C] mb-3">No bookings yet</h2>
+              <h2 className="text-2xl font-semibold text-[#171C3C] mb-3">No bookings yet</h2>
               <p className="text-gray-500 max-w-md">
                 When users register for your events, they will appear here.
               </p>
@@ -355,7 +358,7 @@ export default function MyEvents() {
               <div className="w-24 h-24 bg-gradient-to-br from-[#FE9E8F]/20 to-[#D1CAF2]/20 rounded-full flex items-center justify-center mb-6">
                 <Calendar className="w-12 h-12 text-[#171C3C]/60" />
               </div>
-              <h2 className="text-2xl font-bold text-[#171C3C] mb-3">No event or exhibition added yet</h2>
+              <h2 className="text-2xl font-semibold text-[#171C3C] mb-3">No event or exhibition added yet</h2>
               <p className="text-gray-500 max-w-md mb-8">
                 Start sharing your creative journey with the world. Add your first event or exhibition to invite your audience.
               </p>
@@ -389,19 +392,23 @@ export default function MyEvents() {
                         {evt.eventType}
                       </span>
                     </div>
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-4 right-4 flex flex-col gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1 ${evt.isFree
                         ? 'bg-green-100 text-green-700'
                         : 'bg-yellow-100 text-yellow-700'
                         }`}>
                         {evt.isFree ? 'Free' : `₹${evt.price}`}
                       </span>
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur text-[#171C3C] rounded-full text-xs font-bold shadow-sm flex items-center justify-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {evt.availableTickets}/{evt.capacity}
+                      </span>
                     </div>
                   </div>
 
                   {/* Content */}
                   <div className="p-6 flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-[#171C3C] mb-2 line-clamp-1" title={evt.title}>{evt.title}</h3>
+                    <h3 className="text-xl font-semibold text-[#171C3C] mb-2 line-clamp-1" title={evt.title}>{evt.title}</h3>
 
                     <div className="space-y-2 mt-2 mb-4">
                       <div className="flex items-center text-sm text-gray-600 gap-2">
@@ -457,7 +464,7 @@ export default function MyEvents() {
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
             <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl my-8">
               <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center z-10">
-                <h2 className="text-2xl font-bold text-[#171C3C]">
+                <h2 className="text-2xl font-semibold text-[#171C3C]">
                   {editingEvent ? 'Edit Event Details' : 'Add New Event'}
                 </h2>
                 <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
@@ -623,6 +630,26 @@ export default function MyEvents() {
                       </div>
                     </div>
                   )}
+
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="space-y-2 max-w-md">
+                        <label className="text-sm font-medium text-gray-700">Total Capacity <span className="text-red-500">*</span></label>
+                        <div className="relative">
+                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <input
+                            type="number"
+                            name="capacity"
+                            value={formData.capacity}
+                            onChange={handleInputChange}
+                            min="1"
+                            placeholder="100"
+                            className="w-full pl-9 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#98C4EC] outline-none transition-all"
+                            required
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Maximum number of tickets / attendees allowed.</p>
+                      </div>
+                  </div>
                 </div>
 
                 {/* Description */}
@@ -732,7 +759,7 @@ export default function MyEvents() {
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Trash2 className="w-8 h-8 text-red-500" />
                 </div>
-                <h3 className="text-xl font-bold text-[#171C3C] mb-2">Delete Event?</h3>
+                <h3 className="text-xl font-semibold text-[#171C3C] mb-2">Delete Event?</h3>
                 <p className="text-gray-500 mb-6">
                   Are you sure you want to delete this event? This action cannot be undone and will permanently remove it from your profile.
                 </p>

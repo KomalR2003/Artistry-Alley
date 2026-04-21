@@ -24,7 +24,7 @@ export default function Dashboard({ onNavigate, user }) {
                 { id: 'registeredEvents', label: "Registered", value: "0" },
                 { id: 'upcomingEvents', label: "Upcoming", value: "0" }
             ],
-            navTarget: 'Events'
+            navTarget: 'My Events'
         },
         {
             title: "Gallery Activity",
@@ -171,7 +171,7 @@ export default function Dashboard({ onNavigate, user }) {
             {/* Header Section (Admin Dashboard Style) */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-black">
+                    <h1 className="text-3xl font-semibold text-black">
                         Welcome back,{" "}
                         <span className="text-black">
                             {(activeUser?.name || activeUser?.username || 'User').split(' ')[0]}
@@ -231,7 +231,7 @@ export default function Dashboard({ onNavigate, user }) {
                 {/* Recent Acquisitions - Styled like Admin Recent Orders */}
                 <div className="bg-[#98C4EC]/10 rounded-2xl border border-[#98C4EC]/40 overflow-hidden shadow-sm flex flex-col h-full">
                     <div className="p-6 border-b border-[#98C4EC]/30 flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-[#171C3C]">Recent Orders</h2>
+                        <h2 className="text-xl font-semibold text-[#171C3C]">Recent Orders</h2>
                         <button onClick={() => onNavigate && onNavigate('My Orders')} className="text-sm text-[#171C3C] hover:text-[#98C4EC] transition-colors font-medium">View All</button>
                     </div>
                     <div className="flex flex-col">
@@ -277,8 +277,8 @@ export default function Dashboard({ onNavigate, user }) {
                 {/* Upcoming Schedule - Styled like Admin Pending Activities/Events */}
                 <div className="bg-[#D1CAF2]/10 rounded-2xl border border-[#D1CAF2]/40 overflow-hidden shadow-sm flex flex-col h-full">
                     <div className="p-6 border-b border-[#D1CAF2]/30 flex justify-between items-center">
-                        <h2 className="text-xl font-bold text-[#171C3C]">Upcoming Schedule</h2>
-                        <button onClick={() => onNavigate && onNavigate('Events')} className="text-sm text-[#171C3C] hover:text-[#D1CAF2] transition-colors font-medium">View All</button>
+                        <h2 className="text-xl font-semibold text-[#171C3C]">Upcoming Schedule</h2>
+                        <button onClick={() => onNavigate && onNavigate('My Events')} className="text-sm text-[#171C3C] hover:text-[#D1CAF2] transition-colors font-medium">View All</button>
                     </div>
                     <div className="flex flex-col">
                         {registrations.length === 0 ? (

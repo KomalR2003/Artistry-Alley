@@ -110,7 +110,7 @@ export default function AdminDashboard() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-black">
+          <h1 className="text-2xl font-semibold text-black">
             Admin Dashboard
           </h1>
           <p className="text-[#171C3C]/70 mt-1">
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {stats.map((stat, index) => (
           <div key={index} className="flex flex-col  transition-shadow">
-            <h3 className="text-lg font-bold text-[#171C3C] mb-4">{stat.title}</h3>
+            <h3 className="text-lg font-semibold text-[#171C3C] mb-4">{stat.title}</h3>
             <div className="flex items-center gap-4">
               <div className={`w-2 h-14 rounded-l-full ${stat.barColor} shrink-0`}></div>
               <div className="flex gap-6 w-full">
@@ -158,7 +158,7 @@ export default function AdminDashboard() {
           {/* Categorized Registrations */}
           <div className="bg-white rounded-2xl border border-[#D1CAF2]/40 overflow-hidden shadow-sm">
             <div className="p-5 border-b border-[#D1CAF2]/30 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-[#171C3C]">Registrations</h2>
+              <h2 className="text-xl font-semibold text-[#171C3C]">Registrations</h2>
               <div className="flex bg-[#D1CAF2]/20 rounded-lg p-1">
                 <button onClick={() => setRegTab('artists')} className={`text-xs px-3 py-1 rounded-md font-bold transition-colors ${regTab === 'artists' ? 'bg-white text-[#171C3C] shadow-sm' : 'text-[#171C3C]/60 hover:text-[#171C3C]'}`}>Artists</button>
                 <button onClick={() => setRegTab('users')} className={`text-xs px-3 py-1 rounded-md font-bold transition-colors ${regTab === 'users' ? 'bg-white text-[#171C3C] shadow-sm' : 'text-[#171C3C]/60 hover:text-[#171C3C]'}`}>Users</button>
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
                         {!user.profilePicture && (user.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : 'U')}
                       </div>
                       <div>
-                        <h4 className="font-bold text-[#171C3C] text-sm group-hover:text-[#98C4EC] transition-colors">{user.name || 'Anonymous'}</h4>
+                        <h4 className="font-semibold text-[#171C3C] text-sm group-hover:text-[#98C4EC] transition-colors">{user.name || 'Anonymous'}</h4>
                         <p className="text-xs text-[#171C3C]/60 uppercase tracking-wider font-semibold">{user.role}</p>
                       </div>
                     </div>
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
           {/* Recent Events Display */}
           <div className="bg-[#FE9E8F]/10 rounded-2xl border border-[#FE9E8F]/40 overflow-hidden shadow-sm">
             <div className="p-5 border-b border-[#FE9E8F]/30">
-              <h2 className="text-xl font-bold text-[#171C3C]">Upcoming Details</h2>
+              <h2 className="text-xl font-semibold text-[#171C3C]">Upcoming Details</h2>
             </div>
             <div className="p-5 flex flex-col gap-4">
               {loading ? (
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
               ) : recentEvents.map((event, idx) => (
                 <div key={idx} className="bg-white p-3 rounded-xl border border-[#FE9E8F]/30 flex flex-col">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-[#171C3C] text-sm">{event.title}</h4>
+                    <h4 className="font-semibold text-[#171C3C] text-sm">{event.title}</h4>
                     <span className="text-[10px] font-bold bg-[#FE9E8F]/20 text-[#FE9E8F] px-2 py-0.5 rounded-full uppercase">{event.status}</span>
                   </div>
                   <div className="flex items-center gap-4 text-xs font-semibold text-[#171C3C]/60">
@@ -224,7 +224,7 @@ export default function AdminDashboard() {
           {/* Top Artists Widget */}
           <div className="bg-white rounded-2xl border border-[#D1CAF2]/40 overflow-hidden shadow-sm">
             <div className="p-5 border-b border-[#D1CAF2]/30 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-[#171C3C]">Top Artists</h2>
+              <h2 className="text-xl font-semibold text-[#171C3C]">Top Artists</h2>
               <TrendingUp className="w-5 h-5 text-[#4ADE80]" />
             </div>
             <div className="flex flex-col p-2">
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
                       {!artist.profilePicture && artist.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h4 className="font-bold text-[#171C3C] text-sm">{artist.name}</h4>
+                      <h4 className="font-semibold text-[#171C3C] text-sm">{artist.name}</h4>
                       <p className="text-[11px] text-[#171C3C]/60 font-semibold">{artist.artworks} Entries</p>
                     </div>
                   </div>
@@ -258,7 +258,7 @@ export default function AdminDashboard() {
           {/* Recent Orders Display */}
           <div className="bg-[#98C4EC]/10 rounded-2xl border border-[#98C4EC]/40 overflow-hidden shadow-sm">
             <div className="p-5 border-b border-[#98C4EC]/30">
-              <h2 className="text-xl font-bold text-[#171C3C]">Latest Marketplace Transactions</h2>
+              <h2 className="text-xl font-semibold text-[#171C3C]">Latest Marketplace Transactions</h2>
             </div>
             <div className="flex flex-col">
               {loading ? (
@@ -272,7 +272,7 @@ export default function AdminDashboard() {
                       <ShoppingBag className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-[#171C3C] text-sm">{order.product}</h4>
+                      <h4 className="font-semibold text-[#171C3C] text-sm">{order.product}</h4>
                       <p className="text-[11px] text-[#171C3C]/60 font-semibold mt-0.5">
                         <span className="text-[#171C3C]">{order.buyer}</span> paid <span className="text-[#4ADE80]">{order.amount}</span>
                       </p>
@@ -293,7 +293,7 @@ export default function AdminDashboard() {
           <div className="bg-[#171C3C] rounded-2xl border border-[#D1CAF2]/20 overflow-hidden shadow-md h-full min-h-[500px] flex flex-col p-6">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-3 h-3 bg-[#4ADE80] rounded-full animate-pulse shadow-[0_0_10px_#4ADE80]"></div>
-              <h2 className="text-xl font-bold text-white">Live System Feed</h2>
+              <h2 className="text-xl font-semibold text-white">Live System Feed</h2>
             </div>
 
             <div className="flex-1 space-y-6">

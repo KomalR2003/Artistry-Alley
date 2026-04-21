@@ -230,7 +230,7 @@ export default function Checkout({ onNavigate }) {
             <div className="w-full h-full bg-white text-[#171C3C] p-8 overflow-y-auto">
                 <div className="max-w-4xl mx-auto text-center py-20">
                     <ShoppingCart className="w-24 h-24 text-[#98C4EC]/40 mx-auto mb-6" />
-                    <h2 className="text-3xl font-bold text-[#171C3C] mb-4">Your Cart is Empty</h2>
+                    <h2 className="text-2xl font-semibold text-[#171C3C] mb-4">Your Cart is Empty</h2>
                     <p className="text-[#171C3C]/60 mb-8">Add some beautiful art pieces to checkout!</p>
                     <button
                         onClick={() => router.push('/home')}
@@ -249,7 +249,7 @@ export default function Checkout({ onNavigate }) {
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
-                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#171C3C] via-[#98C4EC] to-[#FE9E8F]">
+                        <h1 className="text-2xl font-semibold text-[#171C3C]">
                             Checkout
                         </h1>
                         <p className="text-[#171C3C]/70 mt-2">
@@ -261,7 +261,7 @@ export default function Checkout({ onNavigate }) {
                         {/* Customer Details Form */}
                         <div className="lg:col-span-2">
                             <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-                                <h2 className="text-2xl font-bold text-[#171C3C] mb-6 flex items-center gap-2">
+                                <h2 className="text-2xl font-semibold text-[#171C3C] mb-6 flex items-center gap-2">
                                     <User className="w-6 h-6 text-[#98C4EC]" />
                                     Customer Information
                                 </h2>
@@ -388,7 +388,7 @@ export default function Checkout({ onNavigate }) {
                         {/* Order Summary - Sticky Sidebar */}
                         <div className="lg:col-span-1">
                             <div className="bg-gradient-to-br from-[#D1CAF2]/10 to-[#98C4EC]/10 rounded-xl p-6 border border-gray-200 sticky top-4">
-                                <h2 className="text-2xl font-bold text-[#171C3C] mb-6">Order Summary</h2>
+                                <h2 className="text-2xl font-semibold text-[#171C3C] mb-6">Order Summary</h2>
 
                                 {/* Cart Items */}
                                 <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">

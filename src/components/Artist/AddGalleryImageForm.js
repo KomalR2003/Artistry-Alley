@@ -117,7 +117,7 @@ const AddGalleryImageForm = ({ isOpen, onClose, onImageAdded }) => {
                 <div className="p-6">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-[#171C3C]">Upload Gallery Image</h2>
+                        <h2 className="text-2xl font-semibold text-[#171C3C]">Upload Gallery Image</h2>
                         <button
                             onClick={onClose}
                             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"

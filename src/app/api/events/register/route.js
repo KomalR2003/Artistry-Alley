@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import dbConnect from '@/app/lib/db';
 import EventRegistration from '@/app/models/EventRegistrationModel';
@@ -95,6 +95,13 @@ export async function POST(req) {
             sendArtistEventRegistrationAlertEmail(savedRegistration, formattedEventInfo)
                 .then(res => console.log("Artist event email result:", res))
                 .catch(err => console.error("Artist event email error:", err));
+        }
+
+        // 5. Decrement Available Tickets
+        if (eventDetails.availableTickets !== undefined) {
+            await EventModel.findByIdAndUpdate(eventId, {
+                $inc: { availableTickets: -tickets }
+            });
         }
 
         return NextResponse.json({

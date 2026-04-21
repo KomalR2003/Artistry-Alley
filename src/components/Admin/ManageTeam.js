@@ -124,7 +124,7 @@ const ManageTeam = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-black border-none">
+          <h1 className="text-2xl font-semibold text-black border-none">
             Manage Team
           </h1>
           <p className="text-[#171C3C]/70 mt-1">
@@ -150,7 +150,7 @@ const ManageTeam = () => {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         <div className="flex flex-col transition-shadow">
-          <h3 className="text-lg font-bold text-[#171C3C] mb-4">Users Overview</h3>
+          <h3 className="text-lg font-semibold text-[#171C3C] mb-4">Users Overview</h3>
           <div className="flex items-center gap-4">
             <div className="w-2 h-14 rounded-l-full bg-[#98C4EC] shrink-0"></div>
             <div className="flex gap-6 w-full">
@@ -219,7 +219,7 @@ const ManageTeam = () => {
                         {!user.profilePicture && (user.username || user.name || 'U').charAt(0).toUpperCase()}
 
                       </div>
-                      <h4 className="font-bold text-black text-sm  line-clamp-1">{user.username || user.name || 'Anonymous User'}</h4>
+                      <h4 className="font-semibold text-black text-sm line-clamp-1">{user.username || user.name || 'Anonymous User'}</h4>
                       <div>
 
                       </div>

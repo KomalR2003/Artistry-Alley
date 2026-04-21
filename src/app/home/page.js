@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Navbar from "../../components/Navbar";
@@ -16,6 +16,8 @@ import Cart from "../../components/User/Cart";
 import Checkout from "../../components/User/Checkout";
 import OrderSuccess from "../../components/User/OrderSuccess";
 import MyOrders from "../../components/User/MyOrders";
+import MyEvents from "../../components/User/MyEvents";
+import EventSuccess from "../../components/User/EventSuccess";
 
 
 
@@ -23,6 +25,7 @@ export default function DashboardPage() {
     const router = useRouter();
     const [activeView, setActiveView] = useState("Home");
     const [orderData, setOrderData] = useState(null);
+    const [eventData, setEventData] = useState(null);
     const [isAuthorized, setIsAuthorized] = useState(false);
 
     useEffect(() => {
@@ -54,9 +57,15 @@ export default function DashboardPage() {
             'contact': 'Contact Us'
         };
 
-        // Handle order data for success page
+        // Handle order data or event data for success pages
         if (data) {
-            setOrderData(data);
+            if (page === 'OrderSuccess') {
+                setOrderData(data);
+            } else if (page === 'EventSuccess') {
+                setEventData(data);
+            } else {
+                setOrderData(data); // Legacy fallback
+            }
         }
 
         setActiveView(pageMap[page] || page);
@@ -69,14 +78,16 @@ export default function DashboardPage() {
             case "About Us": return <AboutUs onNavigate={handleNavigate} />;
             case "Gallery": return <Gallery />;
             case "Products": return <Products />;
-            case "Events": return <Events />;
+            case "Events": return <Events onNavigate={handleNavigate} />;
             case "Our Team": return <OurTeam />;
             case "Blogs": return <Blogs />;
             case "Contact Us": return <ContactUs />;
             case "Cart": return <Cart onNavigate={handleNavigate} />;
             case "Checkout": return <Checkout onNavigate={handleNavigate} />;
             case "OrderSuccess": return <OrderSuccess orderData={orderData} />;
+            case "EventSuccess": return <EventSuccess eventData={eventData} onNavigate={handleNavigate} />;
             case "My Orders": return <MyOrders />;
+            case "My Events": return <MyEvents />;
             default: return <Home onNavigate={handleNavigate} />;
         }
     };

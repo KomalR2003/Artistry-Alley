@@ -15,8 +15,8 @@ export default function AboutUs({ onNavigate }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto px-8 py-16">
           {/* Left Side - Content */}
           <div className="space-y-6">
-            <h1 className="text-5xl font-bold text-[#171C3C] leading-tight">
-              Welcome to <span className="bg-gradient-to-r from-[#171C3C] via-[#98C4EC] to-[#FE9E8F] bg-clip-text text-transparent">Artistry</span>
+            <h1 className="text-5xl font-semibold text-[#171C3C] leading-tight">
+              Welcome to <span className="text-[#171C3C]">Artistry</span>
             </h1>
             <p className="text-lg text-gray-700 leading-relaxed">
               At <span className="font-semibold text-[#171C3C]">Artistry</span>, we celebrate the beauty and diversity of art through a meticulously curated collection and dynamic exhibitions. Our gallery is a vibrant hub for art enthusiasts, collectors, and creatives, offering an immersive experience in the world of visual arts.
@@ -56,7 +56,7 @@ export default function AboutUs({ onNavigate }) {
       <section className="max-w-7xl mx-auto px-8 py-16 space-y-12">
         {/* First Collection Section */}
         <div className="bg-gradient-to-br from-[#D1CAF2]/20 via-[#98C4EC]/10 to-white rounded-2xl p-10 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-[#D1CAF2]/30">
-          <h2 className="text-3xl font-bold text-[#171C3C] mb-4">
+          <h2 className="text-2xl font-semibold text-[#171C3C] mb-4">
             Explore Our Collection
           </h2>
           <p className="text-lg text-gray-700 leading-relaxed">
@@ -66,7 +66,7 @@ export default function AboutUs({ onNavigate }) {
 
         {/* Second Collection Section */}
         <div className="bg-white rounded-2xl p-10 border-2 border-[#98C4EC]/40 shadow-lg hover:shadow-xl hover:border-[#98C4EC] transition-all duration-300">
-          <h2 className="text-3xl font-bold text-[#171C3C] mb-4">
+          <h2 className="text-2xl font-semibold text-[#171C3C] mb-4">
             Dynamic Exhibitions
           </h2>
           <p className="text-lg text-gray-700 leading-relaxed">
@@ -77,7 +77,7 @@ export default function AboutUs({ onNavigate }) {
 
       {/* Explore the Art Universe */}
       <section className="max-w-7xl mx-auto px-8 py-16">
-        <h2 className="text-4xl font-bold text-[#171C3C] mb-12 text-center">
+        <h2 className="text-2xl font-semibold text-[#171C3C] mb-12 text-center">
           Explore the Art Universe
         </h2>
 
@@ -129,7 +129,7 @@ export default function AboutUs({ onNavigate }) {
       {/* Our Impact Section */}
       <section className="bg-gradient-to-br from-[#D1CAF2]/10 via-white to-[#98C4EC]/10 py-20">
         <div className="max-w-7xl mx-auto px-8">
-          <h2 className="text-4xl font-bold text-[#171C3C] text-center mb-16">
+          <h2 className="text-2xl font-semibold text-[#171C3C] text-center mb-16">
             Our Impact
           </h2>
 
@@ -141,7 +141,7 @@ export default function AboutUs({ onNavigate }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                 </svg>
               </div>
-              <h3 className="text-5xl font-bold mb-3 text-[#98C4EC]">200+</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-[#98C4EC]">200+</h3>
               <p className="font-semibold text-[#171C3C] mb-2 text-lg">Artworks Available</p>
               <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Explore now â†’</p>
             </div>
@@ -154,7 +154,7 @@ export default function AboutUs({ onNavigate }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </div>
-              <h3 className="text-5xl font-bold mb-3 text-[#D1CAF2]">20</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-[#D1CAF2]">20</h3>
               <p className="font-semibold text-[#171C3C] mb-2 text-lg">Exhibitions Held</p>
               <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Join Our Exhibitions â†’</p>
             </div>
@@ -166,7 +166,7 @@ export default function AboutUs({ onNavigate }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <h3 className="text-5xl font-bold mb-3 text-[#FE9E8F]">1000+</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-[#FE9E8F]">1000+</h3>
               <p className="font-semibold text-[#171C3C] mb-2 text-lg">Happy Customers</p>
               <p className="text-sm text-gray-600 group-hover:text-[#171C3C] transition-colors font-medium">Join with Us â†’</p>
             </div>
@@ -178,7 +178,7 @@ export default function AboutUs({ onNavigate }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-5xl font-bold mb-3 text-[#171C3C]">30</h3>
+              <h3 className="text-2xl font-semibold mb-3 text-[#171C3C]">30</h3>
               <p className="font-semibold text-[#171C3C] mb-2 text-lg">Talented Artists</p>
               <p className="text-sm text-gray-600 group-hover:text-[#FE9E8F] transition-colors font-medium">Explore more â†’</p>
             </div>
@@ -188,7 +188,7 @@ export default function AboutUs({ onNavigate }) {
 
       {/* Why Choose Us Section */}
       <section className="max-w-7xl mx-auto px-8 py-20">
-        <h2 className="text-4xl font-bold text-[#171C3C] text-center mb-16">
+        <h2 className="text-2xl font-semibold text-[#171C3C] text-center mb-16">
           Why Choose Us?
         </h2>
 
@@ -196,7 +196,7 @@ export default function AboutUs({ onNavigate }) {
           {/* Vibrant Gallery Card */}
           <div className="group bg-white rounded-2xl p-8 border-2 border-[#98C4EC]/40 hover:border-[#98C4EC] shadow-lg hover:shadow-2xl transition-all duration-300 flex items-start gap-6">
             <div className="flex-1">
-              <h3 className="text-2xl font-bold text-[#171C3C] mb-4 group-hover:text-[#FE9E8F] transition-colors">
+              <h3 className="text-2xl font-semibold text-[#171C3C] mb-4 group-hover:text-[#FE9E8F] transition-colors">
                 Vibrant Gallery
               </h3>
               <p className="text-gray-700 leading-relaxed">
@@ -217,7 +217,7 @@ export default function AboutUs({ onNavigate }) {
           {/* Engaging Events Card */}
           <div className="group bg-white rounded-2xl p-8 border-2 border-[#D1CAF2]/40 hover:border-[#D1CAF2] shadow-lg hover:shadow-2xl transition-all duration-300 flex items-start gap-6">
             <div className="flex-1">
-              <h3 className="text-2xl font-bold text-[#171C3C] mb-4 group-hover:text-[#FE9E8F] transition-colors">
+              <h3 className="text-2xl font-semibold text-[#171C3C] mb-4 group-hover:text-[#FE9E8F] transition-colors">
                 Engaging Events
               </h3>
               <p className="text-gray-700 leading-relaxed">
@@ -245,7 +245,7 @@ export default function AboutUs({ onNavigate }) {
 
             {/* Left: Brand & Copyright */}
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold text-white mb-2">Artistry</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Artistry</h3>
               <p className="text-gray-400 text-sm">Â© 2026 Artistry. All rights reserved.</p>
             </div>
 

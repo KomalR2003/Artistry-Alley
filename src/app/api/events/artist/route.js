@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import dbConnect from '../../../lib/db';
 import Event from '../../../models/EventModel';
 
@@ -40,7 +40,8 @@ export async function POST(req) {
             location,
             isFree,
             price,
-            image
+            image,
+            capacity = 100
         } = body;
 
         if (!artistId || !title || !description || !startDate || !endDate || !startTime || !endTime || !location) {
@@ -69,6 +70,8 @@ export async function POST(req) {
             isFree,
             price: isFree ? 0 : price,
             image: image || '',
+            capacity: Number(capacity),
+            availableTickets: Number(capacity),
             status: 'Upcoming'
         });
 

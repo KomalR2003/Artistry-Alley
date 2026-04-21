@@ -1,9 +1,9 @@
-﻿'use client';
+'use client';
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, Search, Filter, X, Loader2, IndianRupee, Image as ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export default function Events() {
+export default function Events({ onNavigate }) {
     const [events, setEvents] = useState([]);
     const [filteredEvents, setFilteredEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,6 +14,8 @@ export default function Events() {
     // Registration State
     const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [detailsEvent, setDetailsEvent] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [registrationData, setRegistrationData] = useState({
         name: '',
@@ -120,6 +122,16 @@ export default function Events() {
         setRegistrationData({ name: '', email: '', phone: '', tickets: 1 });
     };
 
+    const openDetailsModal = (evt) => {
+        setDetailsEvent(evt);
+        setIsDetailsModalOpen(true);
+    };
+
+    const handleRegisterFromDetails = () => {
+        setIsDetailsModalOpen(false);
+        openRegisterModal(detailsEvent);
+    };
+
     const handleRegistrationChange = (e) => {
         const { name, value } = e.target;
         setRegistrationData(prev => ({ ...prev, [name]: value }));
@@ -154,6 +166,15 @@ export default function Events() {
                 if (res.ok && data.success) {
                     toast.success('Registration successful! Check your email.', { id: 'evt-reg' });
                     setIsRegisterModalOpen(false);
+                    if (onNavigate) {
+                        onNavigate('EventSuccess', {
+                            registrationId: data.registrationId,
+                            event: selectedEvent,
+                            customerDetails: registrationData,
+                            tickets: registrationData.tickets,
+                            isFree: true
+                        });
+                    }
                 } else {
                     throw new Error(data.error || 'Registration failed');
                 }
@@ -200,8 +221,17 @@ export default function Events() {
                     const verifyData = await verifyRes.json();
                     if (verifyRes.ok && verifyData.success) {
                         toast.success('Registration and mock payment successful!', { id: 'evt-reg' });
-                        closeRegisterModal();
+                        setIsRegisterModalOpen(false);
                         fetchEvents(); // Refresh to update tickets
+                        if (onNavigate) {
+                            onNavigate('EventSuccess', {
+                                registrationId: verifyData.registrationId,
+                                event: selectedEvent,
+                                customerDetails: registrationData,
+                                tickets: registrationData.tickets,
+                                isFree: false
+                            });
+                        }
                     } else {
                         throw new Error(verifyData.error || 'Payment verification failed');
                     }
@@ -240,6 +270,15 @@ export default function Events() {
                             if (verifyRes.ok && verifyData.success) {
                                 toast.success('Ticket booked successfully! Check your email.', { id: 'evt-reg' });
                                 setIsRegisterModalOpen(false);
+                                if (onNavigate) {
+                                    onNavigate('EventSuccess', {
+                                        registrationId: verifyData.registrationId,
+                                        event: selectedEvent,
+                                        customerDetails: registrationData,
+                                        tickets: registrationData.tickets,
+                                        isFree: false
+                                    });
+                                }
                             } else {
                                 throw new Error(verifyData.error || 'Payment verification failed');
                             }
@@ -278,7 +317,7 @@ export default function Events() {
     };
 
     return (
-        <div className="w-full h-full bg-[#FAFAFC] text-[#171C3C] p-6 md:p-10 overflow-y-auto relative">
+        <div className="w-full h-full bg-[#FAFAFC] text-[#171C3C] p-3 md:p-10 overflow-y-auto relative">
             {/* Ambient Background Glows */}
             <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-br from-[#FE9E8F]/10 via-[#D1CAF2]/10 to-transparent pointer-events-none z-0"></div>
             <div className="fixed top-0 right-0 w-96 h-96 bg-[#98C4EC]/10 rounded-full blur-3xl pointer-events-none z-0"></div>
@@ -287,11 +326,9 @@ export default function Events() {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-8">
                     <div className="max-w-2xl">
-                        <div className="inline-block mb-3 px-3 py-1 rounded-full bg-[#171C3C] text-white text-xs font-bold tracking-widest uppercase shadow-md shadow-[#171C3C]/20">
-                            Happenings
-                        </div>
-                        <h1 className="text-5xl md:text-6xl font-extrabold text-[#171C3C] tracking-tight mb-4">
-                            Exclusive <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#98C4EC] to-[#FE9E8F]">Events</span>
+                       
+                        <h1 className="text-2xl md:text-4xl font-semibold text-[#171C3C] tracking-tight mb-4">
+                            Exclusive <span className="text-[#171C3C]">Events</span>
                         </h1>
                         <p className="text-[#171C3C]/60 text-lg leading-relaxed font-medium">
                             Join our prestigious art exhibitions, exclusive workshops, and captivating gallery nights.
@@ -377,7 +414,7 @@ export default function Events() {
                         <div className="w-24 h-24 bg-gradient-to-br from-[#FE9E8F] to-[#D1CAF2] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#FE9E8F]/40">
                             <Calendar className="w-10 h-10 text-white" />
                         </div>
-                        <h2 className="text-3xl font-bold text-[#171C3C] mb-3">No Upcoming Events</h2>
+                        <h2 className="text-2xl font-semibold text-[#171C3C] mb-3">No Upcoming Events</h2>
                         <p className="text-[#171C3C]/60 mb-8 text-lg max-w-md mx-auto">
                             {events.length === 0
                                 ? 'We are currently planning our next magnificent events. Check back soon.'
@@ -401,7 +438,10 @@ export default function Events() {
                                 className="group relative flex flex-col md:flex-row bg-white rounded-[1.5rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 border border-gray-100 min-h-[160px]"
                             >
                                 {/* Left Side: Image */}
-                                <div className="w-full md:w-[25%] relative bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20 overflow-hidden shrink-0">
+                                <div 
+                                    className="w-full md:w-[25%] relative bg-gradient-to-br from-[#D1CAF2]/20 to-[#98C4EC]/20 overflow-hidden shrink-0 cursor-pointer"
+                                    onClick={() => openDetailsModal(evt)}
+                                >
                                     {evt.image ? (
                                         <img
                                             src={evt.image}
@@ -449,7 +489,7 @@ export default function Events() {
 
                                 {/* Middle Side: Info */}
                                 <div className="flex-1 p-5 md:p-6 flex flex-col justify-center">
-                                    <h3 className="font-extrabold text-[#171C3C] text-xl mb-4 line-clamp-1 group-hover:text-[#98C4EC] transition-colors">
+                                    <h3 className="font-semibold text-[#171C3C] text-xl mb-4 line-clamp-1 group-hover:text-[#98C4EC] transition-colors">
                                         {evt.title}
                                     </h3>
 
@@ -494,9 +534,14 @@ export default function Events() {
                                         </div>
                                     </div>
 
-                                    <p className="text-[#171C3C]/70 line-clamp-2 text-xs mt-auto border-t border-[#171C3C]/5 pt-3">
-                                        {evt.description}
-                                    </p>
+                                    <div className="mt-auto pt-3 border-t border-[#171C3C]/5 flex justify-between items-center">
+                                        <p className="text-[#171C3C]/70 line-clamp-2 text-xs flex-1 pr-4">
+                                            {evt.description}
+                                        </p>
+                                        <span className="text-[#98C4EC] text-xs font-bold uppercase tracking-widest whitespace-nowrap hidden sm:block group-hover:translate-x-1 transition-transform">
+                                            View Details &rarr;
+                                        </span>
+                                    </div>
                                 </div>
 
                                 {/* Dashed Separator Line & Cutouts for the Ticket Feel (visible on md+ only) */}
@@ -528,7 +573,7 @@ export default function Events() {
                                         onClick={() => openRegisterModal(evt)}
                                         className="w-full py-3 px-4 bg-[#171C3C] text-white rounded-xl hover:bg-[#98C4EC] hover:text-[#171C3C] hover:-translate-y-0.5 transition-all duration-300 font-bold text-sm tracking-wide shadow-md shadow-[#171C3C]/10 group-hover:shadow-[#98C4EC]/30"
                                     >
-                                        {evt.isFree ? 'RSVP' : 'Book'}
+                                        {evt.isFree ? 'Register' : 'Book'}
                                     </button>
                                 </div>
                             </div>
@@ -549,7 +594,7 @@ export default function Events() {
                             <div className="absolute top-[-50px] right-[-50px] w-32 h-32 bg-[#98C4EC]/20 rounded-full blur-2xl"></div>
                             <div className="absolute bottom-[-50px] left-[-50px] w-32 h-32 bg-[#FE9E8F]/20 rounded-full blur-2xl"></div>
 
-                            <h2 className="text-3xl font-black mb-2 relative z-10">{selectedEvent.isFree ? 'Your RSVP' : 'Book Tickets'}</h2>
+                            <h2 className="text-2xl font-black mb-2 relative z-10">{selectedEvent.isFree ? 'Free Registration' : 'Book Tickets'}</h2>
                             <p className="text-white/70 font-medium text-sm px-4 relative z-10">
                                 {selectedEvent.title}
                             </p>
@@ -606,26 +651,24 @@ export default function Events() {
                                 />
                             </div>
 
-                            {!selectedEvent.isFree && (
-                                <div className="pt-2 border-t border-[#171C3C]/5">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <label className="block text-xs font-bold uppercase tracking-widest text-[#171C3C]/50">Number of Tickets</label>
-                                        <div className="text-xl font-black text-[#171C3C]">
-                                            ₹{selectedEvent.price * registrationData.tickets}
-                                        </div>
+                            <div className="pt-2 border-t border-[#171C3C]/5">
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-[#171C3C]/50">Number of Tickets</label>
+                                    <div className="text-xl font-black text-[#171C3C]">
+                                        {selectedEvent.isFree ? 'Free' : `₹${selectedEvent.price * registrationData.tickets}`}
                                     </div>
-                                    <input
-                                        type="number"
-                                        name="tickets"
-                                        min="1"
-                                        max="10"
-                                        value={registrationData.tickets}
-                                        onChange={handleRegistrationChange}
-                                        required
-                                        className="w-full px-5 py-3.5 bg-[#FAFAFC] border border-[#171C3C]/10 rounded-2xl focus:bg-white focus:border-[#98C4EC] focus:ring-4 focus:ring-[#98C4EC]/20 focus:outline-none transition-all font-black text-[#171C3C] text-lg text-center"
-                                    />
                                 </div>
-                            )}
+                                <input
+                                    type="number"
+                                    name="tickets"
+                                    min="1"
+                                    max="10"
+                                    value={registrationData.tickets}
+                                    onChange={handleRegistrationChange}
+                                    required
+                                    className="w-full px-5 py-3.5 bg-[#FAFAFC] border border-[#171C3C]/10 rounded-2xl focus:bg-white focus:border-[#98C4EC] focus:ring-4 focus:ring-[#98C4EC]/20 focus:outline-none transition-all font-black text-[#171C3C] text-lg text-center"
+                                />
+                            </div>
 
                             <div className="pt-6 border-t border-[#171C3C]/5">
                                 <button
@@ -644,6 +687,141 @@ export default function Events() {
                                 <p className="text-center text-[10px] uppercase font-bold text-[#171C3C]/40 tracking-widest mt-4">Safe & Secure Process</p>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            
+            {/* Event Full Details Modal */}
+            {isDetailsModalOpen && detailsEvent && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Darker Blur Backdrop */}
+                    <div className="absolute inset-0 bg-[#171C3C]/60 backdrop-blur-md transition-opacity" onClick={() => setIsDetailsModalOpen(false)}></div>
+
+                    <div className="relative bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+                        
+                        {/* Event Image Banner */}
+                        <div className="relative h-64 w-full bg-gray-100 shrink-0">
+                            {detailsEvent.image ? (
+                                <img src={detailsEvent.image} alt={detailsEvent.title} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-[#171C3C]/20 bg-gradient-to-br from-[#D1CAF2]/30 to-[#98C4EC]/30">
+                                    <ImageIcon className="w-20 h-20 mb-2" />
+                                </div>
+                            )}
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setIsDetailsModalOpen(false)}
+                                className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-colors z-20"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                            {/* Event Type Badge */}
+                            <div className="absolute bottom-4 left-6">
+                                <span className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest shadow-lg ${
+                                    detailsEvent.eventType === 'Exhibition' ? 'bg-[#FE9E8F] text-white' : 'bg-[#98C4EC] text-white'
+                                }`}>
+                                    {detailsEvent.eventType || 'Event'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Event Details Body */}
+                        <div className="p-8 md:p-10 flex-1">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <h2 className="text-3xl font-black text-[#171C3C] mb-2">{detailsEvent.title}</h2>
+                                    <p className="text-sm font-bold text-[#98C4EC] uppercase tracking-widest">
+                                        By {detailsEvent.artistId?.name || 'Artistry Gallery'}
+                                    </p>
+                                </div>
+                                <div className="text-right shrink-0 ml-4">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#171C3C]/40 mb-1">Ticket Option</p>
+                                    <span className="text-2xl font-black text-[#171C3C]">
+                                        {detailsEvent.isFree ? 'FREE ENTRY' : `₹${detailsEvent.price}`}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <p className="text-[#171C3C]/80 leading-relaxed mb-8 text-sm md:text-base">
+                                {detailsEvent.description || 'No description provided.'}
+                            </p>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 border-t border-gray-100 pt-8">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-[#D1CAF2]/20 flex items-center justify-center shrink-0 border border-[#D1CAF2]/40 text-[#171C3C]">
+                                        <Calendar className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-[#171C3C]/40 mb-1">Date</p>
+                                        <p className="text-sm font-semibold text-[#171C3C]">
+                                            {new Date(detailsEvent.startDate).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                        </p>
+                                        {detailsEvent.endDate && detailsEvent.endDate !== detailsEvent.startDate && (
+                                            <p className="text-xs text-[#171C3C]/60 mt-0.5">
+                                                to {new Date(detailsEvent.endDate).toLocaleDateString('en-GB', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-[#98C4EC]/20 flex items-center justify-center shrink-0 border border-[#98C4EC]/40 text-[#171C3C]">
+                                        <Clock className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-[#171C3C]/40 mb-1">Time</p>
+                                        <p className="text-sm font-semibold text-[#171C3C]">
+                                            {detailsEvent.startTime || 'TBA'} {detailsEvent.endTime ? `- ${detailsEvent.endTime}` : ''}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-[#FE9E8F]/20 flex items-center justify-center shrink-0 border border-[#FE9E8F]/40 text-[#171C3C]">
+                                        <MapPin className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-[#171C3C]/40 mb-1">Location</p>
+                                        <p className="text-sm font-semibold text-[#171C3C]">
+                                            {detailsEvent.location || 'Artistry Main Gallery'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200 text-[#171C3C]">
+                                        <Users className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-[#171C3C]/40 mb-1">Capacity</p>
+                                        <p className="text-sm font-semibold text-[#171C3C]">
+                                            {detailsEvent.availableTickets !== undefined ? `${detailsEvent.availableTickets} tickets remaining` : 'Available for Booking'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-4 border-t border-gray-100 pt-8 mt-auto">
+                                <button
+                                    onClick={() => setIsDetailsModalOpen(false)}
+                                    className="flex-1 py-4 bg-gray-50 text-[#171C3C] hover:bg-gray-100 rounded-2xl font-bold flex items-center justify-center transition-all border border-gray-200 shadow-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleRegisterFromDetails}
+                                    disabled={detailsEvent.availableTickets === 0}
+                                    className={`flex-1 py-4 text-white rounded-2xl font-black text-lg flex items-center justify-center transition-all shadow-xl ${
+                                        detailsEvent.availableTickets === 0
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-[#171C3C] hover:bg-[#98C4EC] hover:text-[#171C3C] hover:-translate-y-1 shadow-[#171C3C]/20 hover:shadow-[#98C4EC]/30'
+                                    }`}
+                                >
+                                    {detailsEvent.availableTickets === 0 ? 'Sold Out' : (detailsEvent.isFree ? 'Register Now' : 'Book Tickets')}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

@@ -148,7 +148,7 @@ export default function Gallery() {
 
     const getVisibleComments = (img) => {
         if (!img || !img.comments) return [];
-        
+
         // Very robust check to verify if the logged in user is the artist of this image
         let artistIdStr = '';
         if (img.artistId) {
@@ -161,7 +161,7 @@ export default function Gallery() {
         if (isArtist) {
             return img.comments; // Artist sees all comments
         }
-        
+
         // Regular users see approved comments + their own hidden comments
         return img.comments.filter(c => {
             // Hide the old unmoderated test comment manually
@@ -262,7 +262,7 @@ export default function Gallery() {
                     setImages(images.map(img => img._id === updatedImage._id ? updatedImage : img));
                     if (selectedImage && selectedImage._id === updatedImage._id) setSelectedImage(updatedImage);
                 }
-                
+
                 toast.success('Comment posted');
                 if (typeof clearText === 'function') clearText();
             } else {
@@ -279,7 +279,7 @@ export default function Gallery() {
         <div className="w-full h-full bg-white text-[#171C3C] p-4 sm:p-6 lg:p-8 overflow-y-auto">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-[#171C3C]">
+                <h1 className="text-4xl font-semibold text-[#171C3C]">
                     Gallery
                 </h1>
                 <p className="text-[#171C3C]/70 mt-2">
@@ -394,7 +394,7 @@ export default function Gallery() {
             ) : filteredImages.length === 0 ? (
                 <div className="bg-[#D1CAF2]/10 rounded-2xl border border-[#D1CAF2]/40 p-12 text-center">
                     <Images className="w-16 h-16 text-[#D1CAF2] mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-[#171C3C] mb-2">No Artworks Found</h2>
+                    <h2 className="text-2xl font-semibold text-[#171C3C] mb-2">No Artworks Found</h2>
                     <p className="text-[#171C3C]/60 mb-6">
                         {images.length === 0
                             ? 'No artworks available at the moment'
@@ -502,7 +502,7 @@ export default function Gallery() {
                             {/* Modal Header */}
                             <div className="flex justify-between items-start mb-6">
                                 <div>
-                                    <h2 className="text-3xl font-bold text-[#171C3C] mb-2">{selectedImage.title}</h2>
+                                    <h2 className="text-2xl font-semibold text-[#171C3C] mb-2">{selectedImage.title}</h2>
                                     <p className="text-[#171C3C]/60">{selectedImage.category}</p>
                                     {selectedImage.artistName && (
                                         <p className="text-sm text-[#171C3C]/50 mt-1">by {selectedImage.artistName}</p>
@@ -608,7 +608,7 @@ export default function Gallery() {
 
                             {/* Comments Section */}
                             <div className="mt-10 border-t border-gray-100 pt-8">
-                                <h3 className="text-xl font-bold text-[#171C3C] mb-6">Comments</h3>
+                                <h3 className="text-xl font-semibold text-[#171C3C] mb-6">Comments</h3>
 
                                 {/* Comments List */}
                                 <div className="space-y-4 mb-8 max-h-60 overflow-y-auto pr-2">

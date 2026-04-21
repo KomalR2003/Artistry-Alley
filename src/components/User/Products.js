@@ -112,7 +112,7 @@ export default function Products() {
     };
 
     return (
-        <div className="w-full h-full bg-[#FAFAFC] text-[#171C3C] p-6 md:p-10 overflow-y-auto relative">
+        <div className="w-full h-full bg-[#FAFAFC] text-[#171C3C] p-6 md:p-4 overflow-y-auto relative">
             {/* Ambient Background Gradient Glows */}
             <div className="fixed top-0 left-0 w-full h-96 bg-gradient-to-br from-[#98C4EC]/10 via-[#D1CAF2]/10 to-transparent pointer-events-none z-0"></div>
             <div className="fixed top-0 right-0 w-96 h-96 bg-[#FE9E8F]/10 rounded-full blur-3xl pointer-events-none z-0"></div>
@@ -121,10 +121,8 @@ export default function Products() {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-8">
                     <div className="max-w-2xl">
-                        <div className="inline-block mb-3 px-3 py-1 rounded-full bg-[#171C3C] text-white text-xs font-bold tracking-widest uppercase shadow-md shadow-[#171C3C]/20">
-                            The Gallery
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-[#171C3C] tracking-tight mb-4">
+                      
+                        <h1 className="text-2xl md:text-4xl font-semibold text-[#171C3C] tracking-tight mb-4">
                             Masterpiece <span className="text-[#171C3C] ">Collection</span>
                         </h1>
                         <p className="text-[#171C3C]/60 text-lg leading-relaxed font-medium">
@@ -212,7 +210,7 @@ export default function Products() {
                         <div className="w-24 h-24 bg-gradient-to-br from-[#D1CAF2] to-[#98C4EC] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#D1CAF2]/40">
                             <Search className="w-10 h-10 text-white" />
                         </div>
-                        <h2 className="text-3xl font-bold text-[#171C3C] mb-3">No Masterpieces Found</h2>
+                        <h2 className="text-2xl font-semibold text-[#171C3C] mb-3">No Masterpieces Found</h2>
                         <p className="text-[#171C3C]/60 mb-8 text-lg max-w-md mx-auto">
                             {products.length === 0
                                 ? 'Our gallery is currently updating its collection.'
@@ -375,7 +373,7 @@ export default function Products() {
                                 </span>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-[#171C3C] mb-3 leading-snug">
+                            <h2 className="text-2xl font-semibold text-[#171C3C] mb-3 leading-snug">
                                 {selectedProduct.productname}
                             </h2>
 

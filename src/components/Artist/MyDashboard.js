@@ -253,7 +253,7 @@ export default function Dashboard() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-[#171C3C] ">
+                    <h1 className="text-2xl font-semibold text-[#171C3C]">
                         Artist Dashboard
                     </h1>
                     <p className="text-[#171C3C]/70 mt-1">
@@ -292,7 +292,7 @@ export default function Dashboard() {
                     {/* Gallery Overview */}
                     <div className="bg-[#D1CAF2]/10 p-6 rounded-2xl border border-[#D1CAF2]/40">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-[#171C3C]">Recent Gallery Uploads</h2>
+                            <h2 className="text-xl font-semibold text-[#171C3C]">Recent Gallery Uploads</h2>
                             <button className="text-sm text-[#171C3C] hover:text-[#98C4EC] transition-colors font-medium">View All</button>
                         </div>
 
@@ -309,7 +309,7 @@ export default function Dashboard() {
                                     >
                                         <div className="absolute inset-0 bg-white/10 group-hover:bg-transparent transition-colors"></div>
                                     </div>
-                                    <h4 className="font-bold text-[#171C3C] mb-1 truncate">{art.name}</h4>
+                                    <h4 className="font-semibold text-[#171C3C] mb-1 truncate">{art.name}</h4>
                                     <div className="flex justify-between items-center text-sm text-[#171C3C]/70">
                                         <span>{art.date}</span>
                                         <span className="text-[#98C4EC] text-xs px-2 py-0.5 bg-[#98C4EC]/20 rounded-full font-medium">{art.status}</span>
@@ -322,7 +322,7 @@ export default function Dashboard() {
                     {/* Recent Products */}
                     <div className="bg-[#98C4EC]/10 p-6 rounded-2xl border border-[#98C4EC]/40">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-[#171C3C]">Latest Products</h2>
+                            <h2 className="text-xl font-semibold text-[#171C3C]">Latest Products</h2>
                             <button className="text-sm text-[#171C3C] hover:text-[#98C4EC] transition-colors font-medium">View All</button>
                         </div>
                         <div className="space-y-4">
@@ -341,7 +341,7 @@ export default function Dashboard() {
                                             )}
 
                                             <div className="flex flex-col">
-                                                <h4 className="font-bold text-[#171C3C] text-lg leading-tight mb-1">{prod.name}</h4>
+                                                <h4 className="font-semibold text-[#171C3C] text-lg leading-tight mb-1">{prod.name}</h4>
                                                 <p className="text-sm text-[#171C3C]/60 font-medium">Stock: {prod.stock}</p>
                                             </div>
                                         </div>
@@ -356,7 +356,7 @@ export default function Dashboard() {
                 <div className="w-full">
                     {/* Recent Activity */}
                     <div className="bg-[#FE9E8F]/10 p-6 rounded-2xl border border-[#FE9E8F]/40 h-full flex flex-col">
-                        <h2 className="text-xl font-bold text-[#171C3C] mb-6">Recent Activity</h2>
+                        <h2 className="text-xl font-semibold text-[#171C3C] mb-6">Recent Activity</h2>
                         <div className="space-y-6 pb-4">
                             {!recentActivityList || recentActivityList.length === 0 ? (
                                 <p className="text-sm text-gray-500 text-center py-4">No recent activity.</p>

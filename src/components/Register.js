@@ -182,7 +182,7 @@ export default function Register() {
 
           {/* Header */}
           <div className="relative z-10">
-            <h1 className="text-4xl font-bold text-[#171C3C] mb-3">
+            <h1 className="text-2xl font-semibold text-[#171C3C] mb-3">
               Welcome to <span className="text-[#FE9E8F]">Artistry Alley</span>
             </h1>
             <p className="text-gray-600 text-lg">
@@ -215,7 +215,7 @@ export default function Register() {
                       <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg`}>
                         <Icon size={32} className="text-white" />
                       </div>
-                      <h3 className="text-2xl font-bold text-[#171C3C] mb-4">
+                      <h3 className="text-2xl font-semibold text-[#171C3C] mb-4">
                         {feature.title}
                       </h3>
                       <p className="text-gray-600 text-lg leading-relaxed">
@@ -264,7 +264,7 @@ export default function Register() {
           <div className="max-w-xl mx-auto">
             {/* Header */}
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-[#171C3C] mb-2">Create Your Account</h2>
+              <h2 className="text-2xl font-semibold text-[#171C3C] mb-2">Create Your Account</h2>
               <p className="text-gray-600">Join thousands of artists and creators worldwide</p>
               <div className="text-right mt-4">
                 <span className="text-sm text-gray-600">Already have an account? </span>
@@ -281,7 +281,7 @@ export default function Register() {
 
               {/* Account Information Card */}
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#98C4EC]/30 transition-all duration-300">
-                <h3 className="text-lg font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-[#171C3C] mb-4 flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-[#98C4EC] flex items-center justify-center">
                     <User size={16} className="text-white" />
                   </div>
@@ -401,7 +401,7 @@ export default function Register() {
 
               {/* Personal Information Card */}
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#FE9E8F]/30 transition-all duration-300">
-                <h3 className="text-lg font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-[#171C3C] mb-4 flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FE9E8F] to-[#FFB88C] flex items-center justify-center">
                     <Phone size={16} className="text-white" />
                   </div>
@@ -459,7 +459,7 @@ export default function Register() {
 
               {/* Role Selection Card */}
               <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border-2 border-gray-100 hover:border-[#D1CAF2]/30 transition-all duration-300">
-                <h3 className="text-lg font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-[#171C3C] mb-4 flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D1CAF2] to-[#B8AEE8] flex items-center justify-center">
                     <Briefcase size={16} className="text-white" />
                   </div>
@@ -486,7 +486,7 @@ export default function Register() {
               {/* Artist Information Card (Conditional) */}
               {form.role === "artist" && (
                 <div className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border-2 border-purple-100 hover:border-purple-200 transition-all duration-300 animate-fadeIn">
-                  <h3 className="text-lg font-bold text-[#171C3C] mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-[#171C3C] mb-4 flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                       <Palette size={16} className="text-white" />
                     </div>

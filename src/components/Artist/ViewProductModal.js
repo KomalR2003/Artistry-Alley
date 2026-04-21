@@ -21,7 +21,7 @@ const ViewProductModal = ({ isOpen, onClose, product }) => {
                 >
                     {/* Header - Simplified */}
                     <div className="px-8 py-6 border-b border-gray-200 flex justify-between items-center">
-                        <h2 className="text-2xl font-bold text-[#171C3C]">Product Details</h2>
+                        <h2 className="text-2xl font-semibold text-[#171C3C]">Product Details</h2>
                         <button
                             onClick={onClose}
                             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -63,7 +63,7 @@ const ViewProductModal = ({ isOpen, onClose, product }) => {
                             <div className="space-y-6">
                                 {/* Product Name */}
                                 <div>
-                                    <h3 className="text-3xl font-bold text-[#171C3C] mb-3">
+                                    <h3 className="text-2xl font-semibold text-[#171C3C] mb-3">
                                         {product.productname}
                                     </h3>
                                     <span className="inline-block px-3 py-1 bg-gray-100 text-[#171C3C] rounded-lg text-sm font-medium">

@@ -1,4 +1,4 @@
-﻿import mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
 const eventSchema = new mongoose.Schema({
     artistId: {
@@ -59,6 +59,14 @@ const eventSchema = new mongoose.Schema({
         type: String,
         enum: ['Upcoming', 'Ongoing', 'Completed', 'Cancelled'],
         default: 'Upcoming'
+    },
+    capacity: {
+        type: Number,
+        default: 100
+    },
+    availableTickets: {
+        type: Number,
+        default: 100
     }
 }, {
     timestamps: true

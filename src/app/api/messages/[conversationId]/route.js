@@ -16,14 +16,6 @@ export async function GET(request, { params }) {
       return NextResponse.json({ success: false, message: "Conversation ID is required" }, { status: 400 });
     }
 
-    // Fetch messages
-    const messages = await MessageModel.find({ conversationId }).sort({ createdAt: 1 })
-    .populate({
-      path: "senderId",
-      select: "username profilePicture role _id",
-      model: UserModel
-    });
-
     // Mark unread messages sent TO this user as read
     if (userId) {
       await MessageModel.updateMany(
@@ -31,6 +23,14 @@ export async function GET(request, { params }) {
         { isRead: true }
       );
     }
+
+    // Fetch messages AFTER marking read
+    const messages = await MessageModel.find({ conversationId }).sort({ createdAt: 1 })
+    .populate({
+      path: "senderId",
+      select: "username profilePicture role _id",
+      model: UserModel
+    });
 
     return NextResponse.json({ success: true, messages });
   } catch (error) {
