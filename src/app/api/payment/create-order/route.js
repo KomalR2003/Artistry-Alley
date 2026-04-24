@@ -42,8 +42,18 @@ export async function POST(req) {
         });
     } catch (error) {
         console.error("Error creating Razorpay order:", error);
+        
+        let errorMessage = 'Failed to create Razorpay order. Please check your API keys.';
+        if (error?.error?.description) {
+            errorMessage = error.error.description;
+        } else if (error?.description) {
+            errorMessage = error.description;
+        } else if (error?.message) {
+            errorMessage = error.message;
+        }
+
         return NextResponse.json(
-            { success: false, error: error.message || 'Failed to create Razorpay order. Please check your API keys.' },
+            { success: false, error: errorMessage },
             { status: 500 }
         );
     }
