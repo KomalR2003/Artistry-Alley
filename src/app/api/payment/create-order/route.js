@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
 export async function POST(req) {
@@ -41,11 +41,10 @@ export async function POST(req) {
             isMock: false
         });
     } catch (error) {
-        console.error("Error creating Razorpay order, falling back to mock:", error);
-        return NextResponse.json({
-            success: true,
-            order: { id: `mock_order_${Date.now()}`, amount: Math.round(amount * 100), currency },
-            isMock: true
-        });
+        console.error("Error creating Razorpay order:", error);
+        return NextResponse.json(
+            { success: false, error: error.message || 'Failed to create Razorpay order. Please check your API keys.' },
+            { status: 500 }
+        );
     }
 }

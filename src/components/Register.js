@@ -107,7 +107,7 @@ export default function Register() {
       const res = await axios.post("/api/auth/register", form);
 
       if (res.data?.success) {
-        toast.success("Registered Successfully! ðŸŽ‰");
+        toast.success("Registered Successfully!");
         router.push("/login");
       } else {
         toast.error(res.data?.error ?? "Registration failed");
