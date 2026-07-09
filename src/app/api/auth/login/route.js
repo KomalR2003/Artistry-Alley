@@ -49,14 +49,14 @@ export async function POST(request) {
         value: `loggedin-${user._id}`,
         httpOnly: true,
         path: "/",
-        maxAge: 60, // 2 minutes
+        maxAge: 120, // 2 minutes
     });
 
     res.cookies.set({
         name: "role",
         value: user.role,
         path: "/",
-        maxAge: 60, // 2 minutes
+        maxAge: 120, // 2 minutes
     });
 
     return res;
